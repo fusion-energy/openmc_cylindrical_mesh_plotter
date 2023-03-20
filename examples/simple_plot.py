@@ -5,12 +5,13 @@
 import openmc
 import numpy as np
 from math import pi
-from openmc_cylindrical_mesh_plotter import plot_rz_slice
+import matplotlib.pyplot as plt
+import openmc_cylindrical_mesh_plotter  # adds slice_of_data method to CylindricalMesh
 
 mesh = openmc.CylindricalMesh()
-mesh.r_grid = np.linspace(2,10,50)
 mesh.phi_grid = np.linspace(0.,2*pi,10)
-mesh.z_grid = np.linspace(0,5,40)
+mesh.r_grid = np.linspace(0,10,4)
+mesh.z_grid = np.linspace(0,5,5)
 
 tally = openmc.Tally(name='my_tally')
 mesh_filter = openmc.MeshFilter(mesh)
@@ -22,15 +23,15 @@ outer_surface = openmc.Sphere(r=100, boundary_type='vacuum')
 cell = openmc.Cell(region = -outer_surface)
 
 material = openmc.Material()
-material.add_element('Fe', 1)
-material.set_density('g/cm3', 1)
+material.add_nuclide('Fe56', 1)
+material.set_density('g/cm3', 0.1)
 my_materials = openmc.Materials([material])
 
 universe = openmc.Universe(cells=[cell])
 my_geometry = openmc.Geometry(universe)
 
 my_source = openmc.Source()
-my_source.space = openmc.stats.Point((0.,7., 1))
+my_source.space = openmc.stats.Point((5,5., 5))
 # my_source.angle = openmc.stats.Isotropic()
 # my_source.energy = openmc.stats.Discrete([14e6], [1])
 
@@ -53,9 +54,13 @@ mesh.write_data_to_vtk(
     datasets={"mean": my_tally_result.mean}
 )
 
-for slice_id in range(len(mesh.phi_grid)-1):
-    plot  = plot_rz_slice(
-        tally=my_tally_result,
-        slice_id=slice_id
+
+for slice_index in range(len(mesh.phi_grid)-1):
+    data = mesh.slice_of_data(
+        dataset=my_tally_result.mean,
+        slice_index=slice_index
     )
-    plot.show()
+    extent = mesh.get_mpl_plot_extent()
+    plt.imshow(data, extent=extent)
+
+    plt.show()

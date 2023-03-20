@@ -96,3 +96,47 @@ def plot_rz_tally_slice(
     plt.xlabel('R [cm]')
     plt.ylabel('Z [cm]')
     return plt
+
+
+
+def slice_of_data(
+    self,
+    dataset: np.ndarray,
+    # axis='RZ'
+    slice_index=0,
+    volume_normalization: bool = True,
+):
+
+    if volume_normalization:
+        dataset = dataset.flatten() / self.volumes.T.reshape(-1, 3).flatten()
+    else:
+        dataset = dataset.flatten()
+
+    # reshaped_data = dataset.reshape((self.dimension[0], self.dimension[1], self.dimension[2]))
+    # reshaped_data = dataset.reshape((self.dimension[0], self.dimension[2], self.dimension[1])) # not bad
+    # reshaped_data = dataset.reshape((self.dimension[1], self.dimension[2], self.dimension[0]))
+    # reshaped_data = dataset.reshape((self.dimension[1], self.dimension[0], self.dimension[2])) # not this one
+    # reshaped_data = dataset.reshape((self.dimension[2], self.dimension[0], self.dimension[1]))
+    # reshaped_data = dataset.reshape((self.dimension[2], self.dimension[1], self.dimension[0]))
+    # tally_aligned
+    data_slice = dataset.T.reshape(-1, 3)
+
+    data_slice = data_slice[slice_index::self.dimension[1]]
+
+    return np.flip(data_slice,axis=0)
+
+
+
+def get_mpl_plot_extent(self):
+    left = self.r_grid[0]
+    right = self.r_grid[-1]
+    bottom = self.z_grid[0]
+    top = self.z_grid[-1]
+
+    return (left, right, bottom, top)
+
+openmc.CylindricalMesh.slice_of_data = slice_of_data
+openmc.mesh.CylindricalMesh.slice_of_data = slice_of_data
+
+openmc.CylindricalMesh.get_mpl_plot_extent = get_mpl_plot_extent
+openmc.mesh.CylindricalMesh.get_mpl_plot_extent = get_mpl_plot_extent

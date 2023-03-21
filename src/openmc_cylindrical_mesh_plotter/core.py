@@ -17,9 +17,14 @@ def slice_of_data(
 
     data_slice = dataset.T.reshape(-1, 3)
 
-    data_slice = data_slice[slice_index :: self.dimension[1]]
+    # r = data_slice[:, 0]
+    # phi = data_slice[:, 1]
+    # z = data_slice[:, 2]
+    print(data_slice)
+    print(data_slice.shape)
+    # data_slice = data_slice[slice_index :: self.dimension[1]]
 
-    return np.flip(data_slice, axis=0)
+    return data_slice # np.flip(data_slice, axis=0)
 
 
 def get_mpl_plot_extent(self):

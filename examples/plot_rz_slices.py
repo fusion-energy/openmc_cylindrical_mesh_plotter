@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import openmc_cylindrical_mesh_plotter  # adds slice_of_data method to CylindricalMesh
 
 mesh = openmc.CylindricalMesh()
-mesh.phi_grid = np.linspace(0.0, 2 * pi, 3) 
+mesh.phi_grid = np.linspace(0.0, 2 * pi, 3)
 mesh.r_grid = np.linspace(0, 10, 20)
 mesh.z_grid = np.linspace(0, 5, 50)
 
@@ -62,21 +62,23 @@ statepoint = openmc.StatePoint(sp_filename)
 my_tally_result = statepoint.get_tally(name="my_tally")
 
 
-0,4
-4,8
+0, 4
+4, 8
 
 
 # plt.imshow(my_tally_result.mean.flatten().reshape(-1,3,order='C'))
 # plt.show()
 # for n in range(len(mesh.phi_grid)):
 # for n in [(0,4),(4,8)]:
-for n in range(len(mesh.phi_grid)-1):
+for n in range(len(mesh.phi_grid) - 1):
     # lower_index = n[0]
     # upper_index = n[1]
-    lower_index = int(n*(len(mesh.r_grid)-1))
-    upper_index = int((n+1)*(len(mesh.r_grid)-1))
+    lower_index = int(n * (len(mesh.r_grid) - 1))
+    upper_index = int((n + 1) * (len(mesh.r_grid) - 1))
     print(lower_index, upper_index)
-    data=my_tally_result.mean.flatten().reshape(-1,len(mesh.z_grid)-1,order='F')[lower_index:upper_index]
+    data = my_tally_result.mean.flatten().reshape(-1, len(mesh.z_grid) - 1, order="F")[
+        lower_index:upper_index
+    ]
     plt.imshow(np.rot90(data))
     plt.show()
 # plt.imshow(my_tally_result.mean.flatten().reshape(-1,3,order='A'))

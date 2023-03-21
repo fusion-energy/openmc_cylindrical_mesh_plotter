@@ -31,15 +31,28 @@ universe = openmc.Universe(cells=[cell])
 my_geometry = openmc.Geometry(universe)
 
 my_source = openmc.Source()
-my_source.space = openmc.stats.Point((5,5., 5))
-# my_source.angle = openmc.stats.Isotropic()
-# my_source.energy = openmc.stats.Discrete([14e6], [1])
+
+# the distribution of radius is just a single value
+radius = openmc.stats.Discrete([5], [1])
+# the distribution of source z values is just a single value
+z_values = openmc.stats.Discrete([2.5], [1])
+# the distribution of source azimuthal angles values is a uniform distribution between 0 and 2 Pi
+angle = openmc.stats.Uniform(a=0., b=2* 3.14159265359)
+# this makes the ring source using the three distributions and a radius
+# could do a point source instead with my_source.space = openmc.stats.Point((5,5., 5))
+my_source.space = openmc.stats.CylindricalIndependent(
+    r=radius, phi=angle,
+    z=z_values, origin=(0.0, 0.0, 0.0))
+# sets the direction to isotropic
+my_source.angle = openmc.stats.Isotropic()
+
+
 
 my_settings = openmc.Settings()
 # my_settings.inactive = 0
 my_settings.run_mode = "fixed source"
 my_settings.batches = 10
-my_settings.particles = 1000000
+my_settings.particles = 100000
 my_settings.source = my_source
 
 model = openmc.model.Model(my_geometry, my_materials, my_settings, tallies)
@@ -58,9 +71,13 @@ mesh.write_data_to_vtk(
 for slice_index in range(len(mesh.phi_grid)-1):
     data = mesh.slice_of_data(
         dataset=my_tally_result.mean,
-        slice_index=slice_index
+        slice_index=slice_index,
+        volume_normalization=True
     )
     extent = mesh.get_mpl_plot_extent()
+    x_label, y_label = mesh.get_axis_labels()
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     plt.imshow(data, extent=extent)
 
     plt.show()

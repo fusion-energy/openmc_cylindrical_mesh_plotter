@@ -35,7 +35,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install .
-          python -c "import cylindrical_mesh_plotter"
+          python -c "import openmc_cylindrical_mesh_plotter"
 
       - name: install packages for tests
         run: |

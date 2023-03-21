@@ -3,7 +3,7 @@ requires = ["setuptools >= 65.4.0", "setuptools_scm[toml]>=7.0.5"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cylindrical_mesh_plotter"
+name = "openmc_cylindrical_mesh_plotter"
 authors = [
   { name="Jonathan Shimwell", email="mail@jshimwell.com" },
 ]
@@ -25,7 +25,7 @@ dynamic = ["version"]
 
 
 [tool.setuptools_scm]
-write_to = "src/cylindrical_mesh_plotter/_version.py"
+write_to = "src/openmc_cylindrical_mesh_plotter/_version.py"
 
 
 [project.optional-dependencies]
@@ -34,8 +34,8 @@ tests = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/fusion-energy/cylindrical_mesh_plotter"
-"Bug Tracker" = "https://github.com/fusion-energy/cylindrical_mesh_plotter/issues"
+"Homepage" = "https://github.com/fusion-energy/openmc_cylindrical_mesh_plotter"
+"Bug Tracker" = "https://github.com/fusion-energy/openmc_cylindrical_mesh_plotter/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

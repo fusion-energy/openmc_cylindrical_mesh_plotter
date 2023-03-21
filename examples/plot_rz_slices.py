@@ -61,10 +61,6 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-mesh.write_data_to_vtk(
-    filename="my_tally_result.vtk", datasets={"mean": my_tally_result.mean}
-)
-
 
 for slice_index in range(len(mesh.phi_grid) - 1):
     data = mesh.slice_of_data(

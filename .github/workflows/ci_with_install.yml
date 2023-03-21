@@ -1,0 +1,54 @@
+# This CI will launch a Docker image that contains all the dependencies required
+# within that image the pytest test suite is run 
+
+name: CI with install
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '.gitignore'
+      - '*.md'
+      - 'CITATION.cff'
+      - 'LICENSE.txt'
+      - 'readthedocs.yml'
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    container:
+      # image: continuumio/miniconda3:4.10.3
+      image: openmc/openmc:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: install dependencies
+        run: |
+          conda install -c conda-forge mamba
+          mamba install -c conda-forge openmc
+
+      - name: install package
+        run: |
+          pip install --upgrade pip
+          pip install .
+          python -c "import cylindrical_mesh_plotter"
+
+      - name: install packages for tests
+        run: |
+          pip install .[tests]
+
+      - name: Run test_utils
+        run: |
+          pytest tests/ -v --cov=cylindrical_mesh_plotter --cov-append --cov-report term --cov-report xml
+
+      - name: Upload to codecov
+        uses: codecov/codecov-action@v2
+
+      - name: Run examples
+        run: |
+          cd examples
+          python plot_rz_slices.py

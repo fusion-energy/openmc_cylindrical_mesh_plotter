@@ -10,17 +10,20 @@ def slice_of_data(
     slice_index=0,
     volume_normalization: bool = True,
 ):
-
-    lower_index = int(slice_index*(len(self.r_grid)-1))
-    upper_index = int((slice_index+1)*(len(self.r_grid)-1))
+    lower_index = int(slice_index * (len(self.r_grid) - 1))
+    upper_index = int((slice_index + 1) * (len(self.r_grid) - 1))
 
     if volume_normalization:
-        data_slice=dataset.flatten().reshape(-1,len(self.z_grid)-1,order='F')[lower_index:upper_index]
-        data_slice = data_slice/ self.volumes[:,1,:]
+        data_slice = dataset.flatten().reshape(-1, len(self.z_grid) - 1, order="F")[
+            lower_index:upper_index
+        ]
+        data_slice = data_slice / self.volumes[:, 1, :]
 
         return np.rot90(data_slice)
 
-    data_slice=dataset.flatten().reshape(-1,len(self.z_grid)-1,order='F')[lower_index:upper_index]
+    data_slice = dataset.flatten().reshape(-1, len(self.z_grid) - 1, order="F")[
+        lower_index:upper_index
+    ]
 
     return np.rot90(data_slice)
 

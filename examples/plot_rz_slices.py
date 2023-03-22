@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import openmc_cylindrical_mesh_plotter  # adds slice_of_data method to CylindricalMesh
 
 mesh = openmc.CylindricalMesh()
-mesh.phi_grid = np.linspace(0.0, 2 * pi, 3) 
+mesh.phi_grid = np.linspace(0.0, 2 * pi, 3)
 mesh.r_grid = np.linspace(0, 10, 20)
 mesh.z_grid = np.linspace(0, 5, 50)
 
@@ -33,9 +33,9 @@ my_geometry = openmc.Geometry(universe)
 my_source = openmc.Source()
 
 # the distribution of radius is just a single value
-radius = openmc.stats.Discrete([5], [1])
+radius = openmc.stats.Discrete([10], [1])
 # the distribution of source z values is just a single value
-z_values = openmc.stats.Discrete([-5], [1])
+z_values = openmc.stats.Discrete([4], [1])
 # the distribution of source azimuthal angles values is a uniform distribution between 0 and 2 Pi
 angle = openmc.stats.Uniform(a=0.0, b=2 * 3.14159265359)
 # this makes the ring source using the three distributions and a radius
@@ -61,36 +61,17 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
+for slice_index in range(len(mesh.phi_grid) - 1):
+    data = mesh.slice_of_data(
+        dataset=my_tally_result.mean,
+        # dataset=np.array(2*19*49*[1]), flat data for testing
+        slice_index=slice_index,
+        volume_normalization=False,
+    )
+    extent = mesh.get_mpl_plot_extent()
+    x_label, y_label = mesh.get_axis_labels()
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.imshow(data, extent=extent)
 
-0,4
-4,8
-
-
-# plt.imshow(my_tally_result.mean.flatten().reshape(-1,3,order='C'))
-# plt.show()
-# for n in range(len(mesh.phi_grid)):
-# for n in [(0,4),(4,8)]:
-for n in range(len(mesh.phi_grid)-1):
-    # lower_index = n[0]
-    # upper_index = n[1]
-    lower_index = int(n*(len(mesh.r_grid)-1))
-    upper_index = int((n+1)*(len(mesh.r_grid)-1))
-    print(lower_index, upper_index)
-    data=my_tally_result.mean.flatten().reshape(-1,len(mesh.z_grid)-1,order='F')[lower_index:upper_index]
-    plt.imshow(np.rot90(data))
     plt.show()
-# plt.imshow(my_tally_result.mean.flatten().reshape(-1,3,order='A'))
-# plt.show()
-
-# for slice_index in range(len(mesh.phi_grid) - 1):
-#     data = mesh.slice_of_data(
-#         dataset=my_tally_result.mean, slice_index=slice_index,
-#         volume_normalization=False
-#     )
-#     extent = mesh.get_mpl_plot_extent()
-#     x_label, y_label = mesh.get_axis_labels()
-#     plt.xlabel(x_label)
-#     plt.ylabel(y_label)
-#     plt.imshow(data, extent=extent)
-
-#     plt.show()

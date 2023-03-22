@@ -62,31 +62,33 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-actual = np.linspace(mesh.phi_grid[0],mesh.phi_grid[-1], mesh.dimension[1])
-expected = np.linspace(mesh.r_grid[0],mesh.r_grid[-1], mesh.dimension[0])
+actual = np.linspace(mesh.phi_grid[0], mesh.phi_grid[-1], mesh.dimension[1])
+expected = np.linspace(mesh.r_grid[0], mesh.r_grid[-1], mesh.dimension[0])
 
 # Using linspace so that the endpoint of 360 is included
 # actual = np.radians(np.linspace(0, 360, 20))
 # expected = np.arange(0, 70, 10)
 
 r, theta = np.meshgrid(expected, actual)
-values=np.array([(len(mesh.r_grid)-1)*[12]]*(len(mesh.phi_grid)-1))
+values = np.array([(len(mesh.r_grid) - 1) * [12]] * (len(mesh.phi_grid) - 1))
 # # values = np.random.random((actual.size, expected.size))
 
-for slice_index in range(len(mesh.z_grid)-1):
-    lower_index = int(slice_index*(len(mesh.phi_grid)-1))
-    upper_index = int((slice_index+1)*(len(mesh.phi_grid)-1))
+for slice_index in range(len(mesh.z_grid) - 1):
+    lower_index = int(slice_index * (len(mesh.phi_grid) - 1))
+    upper_index = int((slice_index + 1) * (len(mesh.phi_grid) - 1))
 
-    dataset=my_tally_result.mean
-
+    dataset = my_tally_result.mean
 
     # values=dataset.flatten().reshape(-1,len(mesh.r_grid)-1,order='C')[:len(mesh.phi_grid)-1]
-    values=dataset.flatten().reshape(-1,len(mesh.r_grid)-1,order='A')[lower_index:upper_index]
+    values = dataset.flatten().reshape(-1, len(mesh.r_grid) - 1, order="A")[
+        lower_index:upper_index
+    ]
     # rot_val = np.rot90(values)
 
-    fig, ax = plt.subplots(subplot_kw=dict(projection='polar'))
+    fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
     from matplotlib import ticker
-    im = ax.contourf(theta, r, values)#, locator=ticker.LogLocator())
+
+    im = ax.contourf(theta, r, values)  # , locator=ticker.LogLocator())
 
     # ax.contour(theta, r, theta)
     # ax.contourf(theta, r, data_slice)

@@ -67,7 +67,7 @@ for slice_index in range(len(mesh.z_grid) - 1):
     theta, r, values = mesh.slice_of_data(
         dataset=my_tally_result.mean,
         slice_index=slice_index,
-        axis='Phi-R',
+        axis="Phi-R",
         volume_normalization=False,
     )
     # plt.xlabel(x_label)

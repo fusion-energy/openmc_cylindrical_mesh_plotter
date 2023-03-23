@@ -10,19 +10,19 @@ def slice_of_data(
     slice_index=0,
     volume_normalization: bool = True,
 ):
-    if axis == 'R-Z':
+    if axis == "R-Z":
         return slice_of_rz_data(
             self,
             dataset=dataset,
             slice_index=slice_index,
-            volume_normalization=volume_normalization
+            volume_normalization=volume_normalization,
         )
-    elif axis == 'Phi-R':
+    elif axis == "Phi-R":
         return slice_of_phir_data(
             self,
             dataset=dataset,
             slice_index=slice_index,
-            volume_normalization=volume_normalization
+            volume_normalization=volume_normalization,
         )
     else:
         raise ValueError(f'axis must be either "R-Z" or "Phi-R", not {axis}')
@@ -50,13 +50,13 @@ def slice_of_phir_data(
 
     return theta, r, values
 
+
 def slice_of_rz_data(
     self,
     dataset: np.ndarray,
     slice_index=0,
     volume_normalization: bool = True,
 ):
-
     lower_index = int(slice_index * (len(self.r_grid) - 1))
     upper_index = int((slice_index + 1) * (len(self.r_grid) - 1))
 

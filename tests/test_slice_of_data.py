@@ -63,7 +63,7 @@ def test_rz_slice_of_data_flat_data_normalized(volume_normalization):
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flatt_data,
-            axis='R-Z',
+            axis="R-Z",
             slice_index=slice_index,
             volume_normalization=volume_normalization,
         )
@@ -77,11 +77,10 @@ def test_rz_slice_of_data_flat_data_normalized(volume_normalization):
 
 @pytest.mark.parametrize("this", [True, False])
 def test_rz_slice_of_data_simulation_normalization(volume_normalization):
-
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=my_tally_result.mean,
-            axis='R-Z',
+            axis="R-Z",
             slice_index=slice_index,
             volume_normalization=volume_normalization,
         )
@@ -92,13 +91,13 @@ def test_rz_slice_of_data_simulation_normalization(volume_normalization):
         plt.imshow(data, extent=extent)
         assert data.shape == (4, 3)
 
-def test_phiz_slice_of_data_simulation():
 
+def test_phiz_slice_of_data_simulation():
     for slice_index in range(len(mesh.z_grid) - 1):
         theta, r, values = mesh.slice_of_data(
             dataset=my_tally_result.mean,
             slice_index=slice_index,
-            axis='Phi-R',
+            axis="Phi-R",
             volume_normalization=False,
         )
         # plt.xlabel(x_label)
@@ -110,6 +109,3 @@ def test_phiz_slice_of_data_simulation():
         plt.colorbar(im)
 
         plt.show()
-
-
-

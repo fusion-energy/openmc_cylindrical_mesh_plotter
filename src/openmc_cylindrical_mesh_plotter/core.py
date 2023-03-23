@@ -42,7 +42,6 @@ def slice_of_phir_data(
     lower_index = int(slice_index * (len(self.phi_grid) - 1))
     upper_index = int((slice_index + 1) * (len(self.phi_grid) - 1))
 
-
     print(dataset.flatten())
     # both order A and C appear to work
     # values=dataset.flatten().reshape(-1,len(self.r_grid)-1,order='C')[:len(self.phi_grid)-1]

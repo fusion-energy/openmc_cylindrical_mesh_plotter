@@ -11,9 +11,9 @@ mesh.phi_grid = np.linspace(0.0, 2 * pi, 10)
 mesh.r_grid = np.linspace(0, 10, 4)
 mesh.z_grid = np.linspace(0, 5, 5)
 
+
 @pytest.fixture
 def circular_source_simulation():
-
     tally = openmc.Tally(name="my_tally")
     mesh_filter = openmc.MeshFilter(mesh)
     tally.filters.append(mesh_filter)
@@ -31,7 +31,6 @@ def circular_source_simulation():
     universe = openmc.Universe(cells=[cell])
     my_geometry = openmc.Geometry(universe)
 
-    
     my_source = openmc.Source()
 
     # the distribution of radius is just a single value
@@ -64,6 +63,7 @@ def circular_source_simulation():
 
     return my_tally_result.mean
 
+
 @pytest.fixture
 def point_source_simulation():
     mesh = openmc.CylindricalMesh()
@@ -90,7 +90,7 @@ def point_source_simulation():
 
     my_source = openmc.Source()
 
-    my_source.space = openmc.stats.Point((0,0., 0))
+    my_source.space = openmc.stats.Point((0, 0.0, 0))
 
     # sets the direction to isotropic
     my_source.angle = openmc.stats.Isotropic()
@@ -111,6 +111,7 @@ def point_source_simulation():
 
     return my_tally_result.mean
 
+
 @pytest.fixture
 def flat_data():
     flat_data = [1] * len(mesh.phi_grid) * len(mesh.r_grid) * len(mesh.z_grid)
@@ -119,15 +120,15 @@ def flat_data():
 
 def test_get_mpl_plot_extent():
     pass
-    #todo get extern for both plots polar and imshow
+    # todo get extern for both plots polar and imshow
 
 
 def test_get_axis_labels():
-    #todo get labels for both plots polar and imshow
+    # todo get labels for both plots polar and imshow
     pass
 
-def test_rz_slice_of_data_flat_data_normalized(flat_data):
 
+def test_rz_slice_of_data_flat_data_normalized(flat_data):
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flat_data,
@@ -138,11 +139,11 @@ def test_rz_slice_of_data_flat_data_normalized(flat_data):
 
         assert data.shape == (4, 3)
 
-    #TODO check the data values are smaller on the right than the left
+    # TODO check the data values are smaller on the right than the left
     # source is in the middle, voxel volumes are smaller in the center
 
-def test_rz_slice_of_data_flat_data_unnormalized(flat_data):
 
+def test_rz_slice_of_data_flat_data_unnormalized(flat_data):
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flat_data,
@@ -153,10 +154,10 @@ def test_rz_slice_of_data_flat_data_unnormalized(flat_data):
 
         assert data.shape == (4, 3)
 
-    #TODO check the data values equal everywhere
+    # TODO check the data values equal everywhere
+
 
 def test_phir_slice_of_data_flat_data_normalized(flat_data):
-
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flat_data,
@@ -167,10 +168,10 @@ def test_phir_slice_of_data_flat_data_normalized(flat_data):
 
         assert data.shape == (4, 3)
 
-    #TODO check the data values
+    # TODO check the data values
+
 
 def test_phir_slice_of_data_flat_data_unnormalized(flat_data):
-
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flat_data,
@@ -181,7 +182,8 @@ def test_phir_slice_of_data_flat_data_unnormalized(flat_data):
 
         assert data.shape == (4, 3)
 
-    #TODO check the data values equal everywhere
+    # TODO check the data values equal everywhere
+
 
 def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation):
     for slice_index in range(len(mesh.phi_grid) - 1):
@@ -194,9 +196,12 @@ def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation
 
         assert data.shape == (4, 3)
 
-    #TODO test 
+    # TODO test
 
-def test_phir_slice_of_data_circular_simulation_normalization(circular_source_simulation):
+
+def test_phir_slice_of_data_circular_simulation_normalization(
+    circular_source_simulation,
+):
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=circular_source_simulation,
@@ -207,7 +212,8 @@ def test_phir_slice_of_data_circular_simulation_normalization(circular_source_si
 
         assert data.shape == (4, 3)
 
-    #TODO test 
+    # TODO test
+
 
 def test_rz_slice_of_data_point_simulation_unnormalization(point_source_simulation):
     for slice_index in range(len(mesh.phi_grid) - 1):
@@ -220,9 +226,12 @@ def test_rz_slice_of_data_point_simulation_unnormalization(point_source_simulati
 
         assert data.shape == (4, 3)
 
-    #TODO test 
+    # TODO test
 
-def test_phir_slice_of_data_circular_simulation_unnormalization(circular_source_simulation):
+
+def test_phir_slice_of_data_circular_simulation_unnormalization(
+    circular_source_simulation,
+):
     for slice_index in range(len(mesh.phi_grid) - 1):
         theta, r, values = mesh.slice_of_data(
             dataset=circular_source_simulation,
@@ -234,4 +243,4 @@ def test_phir_slice_of_data_circular_simulation_unnormalization(circular_source_
         r.shape == (4, 3)
         values.shape == (4, 3)
 
-    #TODO test 
+    # TODO test

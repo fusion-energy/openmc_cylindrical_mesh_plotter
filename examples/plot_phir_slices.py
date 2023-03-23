@@ -7,6 +7,7 @@ import numpy as np
 from math import pi
 import matplotlib.pyplot as plt
 import openmc_cylindrical_mesh_plotter  # adds slice_of_data method to CylindricalMesh
+from matplotlib import ticker
 
 mesh = openmc.CylindricalMesh()
 mesh.phi_grid = np.linspace(0.0, 2 * pi, 10)
@@ -62,36 +63,19 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-actual = np.linspace(mesh.phi_grid[0], mesh.phi_grid[-1], mesh.dimension[1])
-expected = np.linspace(mesh.r_grid[0], mesh.r_grid[-1], mesh.dimension[0])
-
-# Using linspace so that the endpoint of 360 is included
-# actual = np.radians(np.linspace(0, 360, 20))
-# expected = np.arange(0, 70, 10)
-
-r, theta = np.meshgrid(expected, actual)
-values = np.array([(len(mesh.r_grid) - 1) * [12]] * (len(mesh.phi_grid) - 1))
-# # values = np.random.random((actual.size, expected.size))
-
 for slice_index in range(len(mesh.z_grid) - 1):
-    lower_index = int(slice_index * (len(mesh.phi_grid) - 1))
-    upper_index = int((slice_index + 1) * (len(mesh.phi_grid) - 1))
-
-    dataset = my_tally_result.mean
-
-    # values=dataset.flatten().reshape(-1,len(mesh.r_grid)-1,order='C')[:len(mesh.phi_grid)-1]
-    values = dataset.flatten().reshape(-1, len(mesh.r_grid) - 1, order="A")[
-        lower_index:upper_index
-    ]
-    # rot_val = np.rot90(values)
+    theta, r, values = mesh.slice_of_data(
+        dataset=my_tally_result.mean,
+        slice_index=slice_index,
+        axis='Phi-R',
+        volume_normalization=False,
+    )
+    # plt.xlabel(x_label)
+    # plt.ylabel(y_label)
 
     fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
-    from matplotlib import ticker
-
     im = ax.contourf(theta, r, values)  # , locator=ticker.LogLocator())
 
-    # ax.contour(theta, r, theta)
-    # ax.contourf(theta, r, data_slice)
-
     plt.colorbar(im)
+
     plt.show()

@@ -6,10 +6,57 @@ import openmc
 def slice_of_data(
     self,
     dataset: np.ndarray,
-    # axis='RZ' todo add more axis including top down view
+    axis: str,
     slice_index=0,
     volume_normalization: bool = True,
 ):
+    if axis == 'R-Z':
+        return slice_of_rz_data(
+            self,
+            dataset=dataset,
+            slice_index=slice_index,
+            volume_normalization=volume_normalization
+        )
+    elif axis == 'Phi-R':
+        return slice_of_phir_data(
+            self,
+            dataset=dataset,
+            slice_index=slice_index,
+            volume_normalization=volume_normalization
+        )
+    else:
+        raise ValueError(f'axis must be either "R-Z" or "Phi-R", not {axis}')
+
+
+def slice_of_phir_data(
+    self,
+    dataset: np.ndarray,
+    slice_index=0,
+    volume_normalization: bool = True,
+):
+    actual = np.linspace(self.phi_grid[0], self.phi_grid[-1], self.dimension[1])
+    expected = np.linspace(self.r_grid[0], self.r_grid[-1], self.dimension[0])
+
+    r, theta = np.meshgrid(expected, actual)
+
+    lower_index = int(slice_index * (len(self.phi_grid) - 1))
+    upper_index = int((slice_index + 1) * (len(self.phi_grid) - 1))
+
+    # both order A and C appear to work
+    # values=dataset.flatten().reshape(-1,len(self.r_grid)-1,order='C')[:len(self.phi_grid)-1]
+    values = dataset.flatten().reshape(-1, len(self.r_grid) - 1, order="A")[
+        lower_index:upper_index
+    ]
+
+    return theta, r, values
+
+def slice_of_rz_data(
+    self,
+    dataset: np.ndarray,
+    slice_index=0,
+    volume_normalization: bool = True,
+):
+
     lower_index = int(slice_index * (len(self.r_grid) - 1))
     upper_index = int((slice_index + 1) * (len(self.r_grid) - 1))
 

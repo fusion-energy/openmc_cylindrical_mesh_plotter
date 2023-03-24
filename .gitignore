@@ -132,3 +132,4 @@ src/*/_version.py
 *.vtk
 *.h5
 *.out
+*.png

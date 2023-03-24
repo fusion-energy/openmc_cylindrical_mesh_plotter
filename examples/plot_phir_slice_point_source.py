@@ -1,6 +1,6 @@
 # this example creates a simple CylindricalMesh tally and performs an openmc
 # simulation to populate the tally. Slices of the resulting tally is then
-# plotted using the openmc_cylindrical_plotter
+# plotted using the openmc_cylindrical_plotter in the Phi R axis.
 
 import openmc
 import numpy as np
@@ -10,7 +10,7 @@ import openmc_cylindrical_mesh_plotter  # adds slice_of_data method to Cylindric
 from matplotlib import ticker
 
 mesh = openmc.CylindricalMesh()
-mesh.phi_grid = np.linspace(0.0, 2 * pi, 10)
+mesh.phi_grid = np.linspace(0, 2 * pi, 50)  # note the mesh is full 2pi circle
 mesh.r_grid = np.linspace(0, 10, 20)
 mesh.z_grid = np.linspace(0, 5, 4)
 
@@ -33,18 +33,8 @@ my_geometry = openmc.Geometry(universe)
 
 my_source = openmc.Source()
 
-# the distribution of radius is just a single value
-radius = openmc.stats.Discrete([5], [1])
-# the distribution of source z values is just a single value
-z_values = openmc.stats.Discrete([2.5], [1])
-# the distribution of source azimuthal angles values is a uniform distribution between 0 and 2 Pi
-angle = openmc.stats.Uniform(a=0.0, b=1 * 3.14159265359)
-# this makes the ring source using the three distributions and a radius
-# could do a point source instead with
-# my_source.space = openmc.stats.Point((0,0,0))
-my_source.space = openmc.stats.CylindricalIndependent(
-    r=radius, phi=angle, z=z_values, origin=(0.0, 0.0, 0.0)
-)
+# this makes a point source instead with
+my_source.space = openmc.stats.Point((0,-5,0))
 # sets the direction to isotropic
 my_source.angle = openmc.stats.Isotropic()
 
@@ -63,19 +53,20 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-for slice_index in range(len(mesh.z_grid) - 1):
+for slice_index in range(1, len(mesh.z_grid)):
     theta, r, values = mesh.slice_of_data(
-        dataset=my_tally_result.mean,
+        dataset=my_tally_result.mean.flatten(),
         slice_index=slice_index,
-        axis="Phi-R",
+        axis="PhiR",
         volume_normalization=False,
     )
-    # plt.xlabel(x_label)
-    # plt.ylabel(y_label)
 
     fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
-    im = ax.contourf(theta, r, values)  # , locator=ticker.LogLocator())
+    im = ax.contourf(theta, r, values, extent=(0,100,0,50))  # , locator=ticker.LogLocator())
 
-    plt.colorbar(im)
+    # sets the y axis limits to match the mesh limits
+    ax.set_ylim(mesh.r_grid[0], mesh.r_grid[-1])
+
+    plt.colorbar(im, label = 'Flux')
 
     plt.show()

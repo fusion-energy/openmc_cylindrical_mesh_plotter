@@ -61,9 +61,10 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-for slice_index in range(len(mesh.phi_grid) - 1):
+for slice_index in range(1,len(mesh.phi_grid)):
     data = mesh.slice_of_data(
-        dataset=my_tally_result.mean,
+        dataset=my_tally_result.mean.flatten(),
+        axis='RZ',
         # dataset=np.array(2*19*49*[1]), flat data for testing
         slice_index=slice_index,
         volume_normalization=False,
@@ -72,6 +73,8 @@ for slice_index in range(len(mesh.phi_grid) - 1):
     x_label, y_label = mesh.get_axis_labels()
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.imshow(data, extent=extent)
+    im = plt.imshow(data, extent=extent)
+    
+    plt.colorbar(im, label='Flux')
 
     plt.show()

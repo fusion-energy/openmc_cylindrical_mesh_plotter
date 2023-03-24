@@ -61,7 +61,7 @@ def circular_source_simulation():
 
     my_tally_result = statepoint.get_tally(name="my_tally")
 
-    return my_tally_result.mean
+    return my_tally_result.mean.flatten()
 
 
 @pytest.fixture
@@ -109,7 +109,7 @@ def point_source_simulation():
 
     my_tally_result = statepoint.get_tally(name="my_tally")
 
-    return my_tally_result.mean
+    return my_tally_result.mean.flatten()
 
 
 @pytest.fixture
@@ -132,7 +132,7 @@ def test_rz_slice_of_data_flat_data_normalized(flat_data):
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flat_data,
-            axis="R-Z",
+            axis="RZ",
             slice_index=slice_index,
             volume_normalization=True,
         )
@@ -147,7 +147,7 @@ def test_rz_slice_of_data_flat_data_unnormalized(flat_data):
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flat_data,
-            axis="R-Z",
+            axis="RZ",
             slice_index=slice_index,
             volume_normalization=False,
         )
@@ -161,7 +161,7 @@ def test_phir_slice_of_data_flat_data_normalized(flat_data):
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flat_data,
-            axis="Phi-R",
+            axis="PhiR",
             slice_index=slice_index,
             volume_normalization=True,
         )
@@ -175,7 +175,7 @@ def test_phir_slice_of_data_flat_data_unnormalized(flat_data):
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=flat_data,
-            axis="R-Z",
+            axis="RZ",
             slice_index=slice_index,
             volume_normalization=False,
         )
@@ -189,7 +189,7 @@ def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=point_source_simulation,
-            axis="R-Z",
+            axis="RZ",
             slice_index=slice_index,
             volume_normalization=True,
         )
@@ -205,7 +205,7 @@ def test_phir_slice_of_data_circular_simulation_normalization(
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=circular_source_simulation,
-            axis="Phi-R",
+            axis="PhiR",
             slice_index=slice_index,
             volume_normalization=True,
         )
@@ -219,7 +219,7 @@ def test_rz_slice_of_data_point_simulation_unnormalization(point_source_simulati
     for slice_index in range(len(mesh.phi_grid) - 1):
         data = mesh.slice_of_data(
             dataset=point_source_simulation,
-            axis="R-Z",
+            axis="RZ",
             slice_index=slice_index,
             volume_normalization=False,
         )
@@ -235,7 +235,7 @@ def test_phir_slice_of_data_circular_simulation_unnormalization(
     for slice_index in range(len(mesh.phi_grid) - 1):
         theta, r, values = mesh.slice_of_data(
             dataset=circular_source_simulation,
-            axis="Phi-R",
+            axis="PhiR",
             slice_index=slice_index,
             volume_normalization=False,
         )

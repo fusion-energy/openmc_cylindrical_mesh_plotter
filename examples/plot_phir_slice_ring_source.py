@@ -11,7 +11,9 @@ from matplotlib import ticker
 from math import pi
 
 mesh = openmc.CylindricalMesh()
-mesh.phi_grid = np.linspace(0.0, 1.5 * pi, 10)  # note the mesh is 3/4 of a circle, not the full 2pi
+mesh.phi_grid = np.linspace(
+    0.0, 1.5 * pi, 10
+)  # note the mesh is 3/4 of a circle, not the full 2pi
 mesh.r_grid = np.linspace(0, 10, 20)
 mesh.z_grid = np.linspace(0, 5, 4)
 
@@ -73,11 +75,13 @@ for slice_index in range(1, len(mesh.z_grid)):
     )
 
     fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
-    im = ax.contourf(theta, r, values, extent=(0,100,0,50))  # , locator=ticker.LogLocator())
+    im = ax.contourf(
+        theta, r, values, extent=(0, 100, 0, 50)
+    )  # , locator=ticker.LogLocator())
 
     # sets the y axis limits to match the mesh limits
     ax.set_ylim(mesh.r_grid[0], mesh.r_grid[-1])
 
-    plt.colorbar(im, label='Flux')
+    plt.colorbar(im, label="Flux")
 
     plt.show()

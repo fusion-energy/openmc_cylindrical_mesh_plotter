@@ -60,23 +60,24 @@ def slice_of_phir_data(
 
     df = pd.DataFrame(
         {
-            'r': r,
-            'phi': phi,
-            'z': z,
-            'value': dataset,
-            'volume':self.volumes.flatten(),
-            'normalised_value':dataset/self.volumes.flatten(),
+            "r": r,
+            "phi": phi,
+            "z": z,
+            "value": dataset,
+            "volume": self.volumes.flatten(),
+            "normalised_value": dataset / self.volumes.flatten(),
         }
     )
-    df_slice = df[df['z'] == slice_index]
+    df_slice = df[df["z"] == slice_index]
 
     if volume_normalization:
-        shaped_slice = df_slice['normalised_value'].to_numpy().reshape(-1, len(self.r_grid)-1)
+        shaped_slice = (
+            df_slice["normalised_value"].to_numpy().reshape(-1, len(self.r_grid) - 1)
+        )
     else:
-        shaped_slice = df_slice['value'].to_numpy().reshape(-1, len(self.r_grid)-1)
-    
-    return theta, rad, shaped_slice
+        shaped_slice = df_slice["value"].to_numpy().reshape(-1, len(self.r_grid) - 1)
 
+    return theta, rad, shaped_slice
 
 
 def slice_of_rz_data(
@@ -111,23 +112,24 @@ def slice_of_rz_data(
 
     df = pd.DataFrame(
         {
-            'r': r,
-            'phi': phi,
-            'z': z,
-            'value': dataset,
-            'volume':self.volumes.flatten(),
-            'normalised_value':dataset/self.volumes.flatten(),
+            "r": r,
+            "phi": phi,
+            "z": z,
+            "value": dataset,
+            "volume": self.volumes.flatten(),
+            "normalised_value": dataset / self.volumes.flatten(),
         }
     )
-    df_slice = df[df['phi'] == slice_index]
+    df_slice = df[df["phi"] == slice_index]
 
     if volume_normalization:
-        shaped_slice = df_slice['normalised_value'].to_numpy().reshape(-1, len(self.r_grid)-1)
+        shaped_slice = (
+            df_slice["normalised_value"].to_numpy().reshape(-1, len(self.r_grid) - 1)
+        )
     else:
-        shaped_slice = df_slice['value'].to_numpy().reshape(-1, len(self.r_grid)-1)
-    
-    return np.flipud(shaped_slice)
+        shaped_slice = df_slice["value"].to_numpy().reshape(-1, len(self.r_grid) - 1)
 
+    return np.flipud(shaped_slice)
 
 
 def get_mpl_plot_extent(self):

@@ -34,7 +34,7 @@ my_geometry = openmc.Geometry(universe)
 my_source = openmc.Source()
 
 # this makes a point source instead with
-my_source.space = openmc.stats.Point((0,-5,0))
+my_source.space = openmc.stats.Point((0, -5, 0))
 # sets the direction to isotropic
 my_source.angle = openmc.stats.Isotropic()
 
@@ -62,11 +62,13 @@ for slice_index in range(1, len(mesh.z_grid)):
     )
 
     fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
-    im = ax.contourf(theta, r, values, extent=(0,100,0,50))  # , locator=ticker.LogLocator())
+    im = ax.contourf(
+        theta, r, values, extent=(0, 100, 0, 50)
+    )  # , locator=ticker.LogLocator())
 
     # sets the y axis limits to match the mesh limits
     ax.set_ylim(mesh.r_grid[0], mesh.r_grid[-1])
 
-    plt.colorbar(im, label = 'Flux')
+    plt.colorbar(im, label="Flux")
 
     plt.show()

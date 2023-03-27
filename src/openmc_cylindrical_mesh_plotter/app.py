@@ -169,6 +169,15 @@ def main():
             axes.set_xlabel(xlabel)
             axes.set_ylabel(ylabel)
             im = axes.imshow(X=image_slice, extent=extent, norm=norm)
+
+            if contour_levels_str:
+                axes.contour(
+                    image_slice,
+                    levels=contour_levels,
+                    colors="black",
+                    linewidths=1,
+                    extent=extent,
+                )
         else:
             extent = None # not yet figured out
             theta, r, values = mesh.slice_of_data(
@@ -185,14 +194,14 @@ def main():
                 norm=norm
             )  # , locator=ticker.LogLocator())
 
-        if contour_levels_str:
-            axes.contour(
-                theta, r, values,
-                levels=contour_levels,
-                colors="darkgrey",
-                linewidths=1,
-                extent=extent,
-            )
+            if contour_levels_str:
+                axes.contour(
+                    theta, r, values,
+                    levels=contour_levels,
+                    colors="darkgrey",
+                    linewidths=1,
+                    extent=extent,
+                )
 
         plt.colorbar(im, label=title, ax=axes)
 

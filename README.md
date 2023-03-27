@@ -18,6 +18,14 @@ openmc_cylindrical_mesh_plotter is available on PyPi
 pip install openmc_cylindrical_mesh_plotter
 ```
 
-## Usage
+## API Usage
 
 See the [examples](https://github.com/fusion-energy/openmc_cylindrical_mesh_plotter/tree/main/examples) folder for example scripts
+
+## Graphical User Interface Usage
+
+```bash
+openmc_cylindrical_mesh_plotter
+```
+
+![openmc cylinder mesh plot GUI](https://user-images.githubusercontent.com/8583900/228016577-d5d9f541-1b4d-4d9b-a207-f3f1d08e27a8.gif)

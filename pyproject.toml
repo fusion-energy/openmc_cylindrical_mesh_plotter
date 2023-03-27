@@ -20,7 +20,8 @@ classifiers = [
 dependencies = [
     "numpy>=1.21.1",
     "matplotlib>=3.4.2",
-    "pandas"
+    "pandas",
+    "streamlit"
 ]
 dynamic = ["version"]
 

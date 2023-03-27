@@ -26,7 +26,9 @@ def slice_of_data(
             volume_normalization=volume_normalization,
         )
     else:
-        raise ValueError(f'view_direction must be either "RZ" or "PhiR", not {view_direction}')
+        raise ValueError(
+            f'view_direction must be either "RZ" or "PhiR", not {view_direction}'
+        )
 
 
 def slice_of_phir_data(
@@ -132,26 +134,26 @@ def slice_of_rz_data(
     return np.flipud(shaped_slice)
 
 
-def get_mpl_plot_extent(self, view_direction='RZ'):
+def get_mpl_plot_extent(self, view_direction="RZ"):
     """Returns the (x_min, x_max, y_min, y_max) of the mesh based on the
     r_grid and z_grid."""
-    if view_direction == 'RZ':
+    if view_direction == "RZ":
         left = self.r_grid[0]
         right = self.r_grid[-1]
         bottom = self.z_grid[0]
         top = self.z_grid[-1]
         return (left, right, bottom, top)
-    elif view_direction == 'PhiR':
-        print('extent has not been implemented for PhiR slices')
+    elif view_direction == "PhiR":
+        print("extent has not been implemented for PhiR slices")
 
 
-def get_axis_labels(self, view_direction='RZ'):
+def get_axis_labels(self, view_direction="RZ"):
     """Returns two axis label values for the x and y value. Takes
     view_direction into account."""
-    if view_direction == 'RZ':
+    if view_direction == "RZ":
         xlabel = "R [cm]"
         ylabel = "Z [cm]"
-    elif view_direction == 'PhiR':
+    elif view_direction == "PhiR":
         xlabel = "R [cm]"
         ylabel = "Phi"
 
@@ -194,11 +196,12 @@ def get_cylindricalmesh_tallies_and_scores(statepoint: openmc.StatePoint):
 
 
 def get_number_of_slices(self, view_direction: str):
-    if view_direction == 'RZ':
+    if view_direction == "RZ":
         return self.dimension[1]
 
-    elif view_direction == 'PhiR':
+    elif view_direction == "PhiR":
         return self.dimension[2]
+
 
 openmc.CylindricalMesh.get_number_of_slices = get_number_of_slices
 openmc.mesh.CylindricalMesh.get_number_of_slices = get_number_of_slices

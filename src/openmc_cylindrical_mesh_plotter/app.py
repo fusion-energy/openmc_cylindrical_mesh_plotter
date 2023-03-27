@@ -52,7 +52,6 @@ def header():
 
 
 def main():
-
     st.write(
         """
             👉 Carry out an OpenMC simulation to generate a ```statepoint.h5``` file.
@@ -63,20 +62,15 @@ def main():
         # [ example 2 ](https://fusion-energy.github.io/openmc_cylindrical_mesh_plotter/examples/csg_cylinder_box/geometry.xml)
     )
 
-    statepoint_file = st.file_uploader(
-        "Select your statepoint h5 file", type=["h5"]
-    )
+    statepoint_file = st.file_uploader("Select your statepoint h5 file", type=["h5"])
 
     if statepoint_file is None:
         new_title = '<center><p style="font-family:sans-serif; color:Red; font-size: 30px;">Select your depletion results h5 file</p></center>'
         st.markdown(new_title, unsafe_allow_html=True)
 
     else:
-
         save_uploadedfile(statepoint_file)
         statepoint = openmc.StatePoint(statepoint_file.name)
-
-
 
         tally_description = cmp.get_cylindricalmesh_tallies_and_scores(statepoint)
         tally_description_str = [
@@ -98,7 +92,9 @@ def main():
             help="",
         )
 
-        tally_or_std = st.sidebar.radio("Tally mean or std dev", options=["mean", "std_dev"])
+        tally_or_std = st.sidebar.radio(
+            "Tally mean or std dev", options=["mean", "std_dev"]
+        )
 
         volume_normalization = st.sidebar.radio(
             "Divide value by mesh voxel volume", options=[True, False]
@@ -111,7 +107,9 @@ def main():
         )
 
         my_tally = statepoint.get_tally(id=int(tally_id_to_plot))
-        score = my_tally.get_values(scores=[tally_score_to_plot], value=tally_or_std).flatten()
+        score = my_tally.get_values(
+            scores=[tally_score_to_plot], value=tally_or_std
+        ).flatten()
         mesh = my_tally.find_filter(filter_type=openmc.MeshFilter).mesh
         extent = mesh.get_mpl_plot_extent(view_direction=view_direction)
 
@@ -151,10 +149,9 @@ def main():
         else:
             norm = LogNorm()
 
-
         xlabel, ylabel = mesh.get_axis_labels(view_direction=view_direction)
 
-        if view_direction=='RZ':
+        if view_direction == "RZ":
             image_slice = mesh.slice_of_data(
                 dataset=score,  # ,
                 view_direction=view_direction,
@@ -179,7 +176,7 @@ def main():
                     extent=extent,
                 )
         else:
-            extent = None # not yet figured out
+            extent = None  # not yet figured out
             theta, r, values = mesh.slice_of_data(
                 dataset=score,  # ,
                 view_direction=view_direction,
@@ -189,9 +186,7 @@ def main():
             values = values * value_multiple
             fig, axes = plt.subplots(subplot_kw=dict(projection="polar"))
             im = axes.contourf(
-                theta, r, values,
-                extent=extent,
-                norm=norm
+                theta, r, values, extent=extent, norm=norm
             )  # , locator=ticker.LogLocator())
 
             if contour_levels_str:

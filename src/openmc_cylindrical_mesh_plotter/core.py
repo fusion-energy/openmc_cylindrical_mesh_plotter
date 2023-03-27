@@ -7,18 +7,18 @@ import openmc
 def slice_of_data(
     self,
     dataset: np.ndarray,
-    axis: str,
+    view_direction: str,
     slice_index=0,
     volume_normalization: bool = True,
 ):
-    if axis == "RZ":
+    if view_direction == "RZ":
         return slice_of_rz_data(
             self,
             dataset=dataset,
             slice_index=slice_index,
             volume_normalization=volume_normalization,
         )
-    elif axis == "PhiR":
+    elif view_direction == "PhiR":
         return slice_of_phir_data(
             self,
             dataset=dataset,
@@ -26,7 +26,7 @@ def slice_of_data(
             volume_normalization=volume_normalization,
         )
     else:
-        raise ValueError(f'axis must be either "RZ" or "PhiR", not {axis}')
+        raise ValueError(f'view_direction must be either "RZ" or "PhiR", not {view_direction}')
 
 
 def slice_of_phir_data(
@@ -132,26 +132,76 @@ def slice_of_rz_data(
     return np.flipud(shaped_slice)
 
 
-def get_mpl_plot_extent(self):
+def get_mpl_plot_extent(self, view_direction='RZ'):
     """Returns the (x_min, x_max, y_min, y_max) of the mesh based on the
     r_grid and z_grid."""
-    left = self.r_grid[0]
-    right = self.r_grid[-1]
-    bottom = self.z_grid[0]
-    top = self.z_grid[-1]
+    if view_direction == 'RZ':
+        left = self.r_grid[0]
+        right = self.r_grid[-1]
+        bottom = self.z_grid[0]
+        top = self.z_grid[-1]
+        return (left, right, bottom, top)
+    elif view_direction == 'PhiR':
+        print('extent has not been implemented for PhiR slices')
 
-    return (left, right, bottom, top)
 
-
-def get_axis_labels(self):
+def get_axis_labels(self, view_direction='RZ'):
     """Returns two axis label values for the x and y value. Takes
     view_direction into account."""
-
-    xlabel = "R [cm]"
-    ylabel = "Z [cm]"
+    if view_direction == 'RZ':
+        xlabel = "R [cm]"
+        ylabel = "Z [cm]"
+    elif view_direction == 'PhiR':
+        xlabel = "R [cm]"
+        ylabel = "Phi"
 
     return xlabel, ylabel
 
+
+def get_tallies_with_cylindrical_mesh_filters(statepoint: openmc.StatePoint):
+    """scans the statepoint object to find all tallies and with cylindrical mesh
+    filters, returns a list of tally indexes"""
+
+    matching_tally_ids = []
+    for tally_id, tally in statepoint.tallies.items():
+        print("tally id", tally_id)
+        try:
+            mf = tally.find_filter(filter_type=openmc.MeshFilter)
+            if isinstance(mf.mesh, openmc.CylindricalMesh):
+                matching_tally_ids.append(tally.id)
+                print("found regmeshfilter")
+        except ValueError:
+            mf = None
+
+    return sorted(matching_tally_ids)
+
+
+def get_cylindricalmesh_tallies_and_scores(statepoint: openmc.StatePoint):
+    """scans the statepoint object to find all tallies and scores,
+    returns list of dictionaries. Each dictionary contains tally id,
+    score and tally name"""
+
+    tallies_of_interest = get_tallies_with_cylindrical_mesh_filters(statepoint)
+
+    tally_score_info = []
+    for tally_id in tallies_of_interest:
+        tally = statepoint.tallies[tally_id]
+        for score in tally.scores:
+            entry = {"id": tally.id, "score": score, "name": tally.name}
+            tally_score_info.append(entry)
+
+    return tally_score_info
+
+
+def get_number_of_slices(self, view_direction: str):
+    if view_direction == 'RZ':
+        return self.dimension[1]
+
+    elif view_direction == 'PhiR':
+        return self.dimension[2]
+
+openmc.CylindricalMesh.get_number_of_slices = get_number_of_slices
+openmc.mesh.CylindricalMesh.get_number_of_slices = get_number_of_slices
 
 openmc.CylindricalMesh.slice_of_data = slice_of_data
 openmc.mesh.CylindricalMesh.slice_of_data = slice_of_data

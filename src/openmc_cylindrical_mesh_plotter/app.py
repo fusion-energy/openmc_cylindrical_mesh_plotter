@@ -191,7 +191,9 @@ def main():
 
             if contour_levels_str:
                 axes.contour(
-                    theta, r, values,
+                    theta,
+                    r,
+                    values,
                     levels=contour_levels,
                     colors="darkgrey",
                     linewidths=1,

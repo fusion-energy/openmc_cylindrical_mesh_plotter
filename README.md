@@ -24,6 +24,8 @@ See the [examples](https://github.com/fusion-energy/openmc_cylindrical_mesh_plot
 
 ## Graphical User Interface Usage
 
+Once installed you should be able to type the following command from the terminal and the GUI will launch in a browser window.
+
 ```bash
 openmc_cylindrical_mesh_plotter
 ```

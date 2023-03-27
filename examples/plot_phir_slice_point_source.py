@@ -57,7 +57,7 @@ for slice_index in range(1, len(mesh.z_grid)):
     theta, r, values = mesh.slice_of_data(
         dataset=my_tally_result.mean.flatten(),
         slice_index=slice_index,
-        axis="PhiR",
+        view_direction="PhiR",
         volume_normalization=False,
     )
 

@@ -120,7 +120,7 @@ def plot_mesh_tally(
 
     if basis == "rz":
         slice_data = tally_data[:, slice_index, :]
-        data = np.rot90(slice_data, -1)
+        data = np.rot90(slice_data, 1)
         xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     else:  # basis == 'phir'
         # todo
@@ -128,7 +128,7 @@ def plot_mesh_tally(
 
     if volume_normalization:
         slice_volumes = mesh.volumes[:, slice_index, :]
-        data = data / slice_volumes
+        data = data / np.rot90(slice_volumes, 1)
 
     if scaling_factor:
         data = data * scaling_factor

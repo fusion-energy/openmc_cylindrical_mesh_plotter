@@ -1,216 +1,235 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
+import math
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Optional
 import openmc
+import numpy as np
+import openmc
+import openmc.checkvalue as cv
+import matplotlib.pyplot as plt
 
+from packaging import version
 
-def slice_of_data(
-    self,
-    dataset: np.ndarray,
-    view_direction: str,
-    slice_index=0,
-    volume_normalization: bool = True,
-):
-    if view_direction == "RZ":
-        return slice_of_rz_data(
-            self,
-            dataset=dataset,
-            slice_index=slice_index,
-            volume_normalization=volume_normalization,
-        )
-    elif view_direction == "PhiR":
-        return slice_of_phir_data(
-            self,
-            dataset=dataset,
-            slice_index=slice_index,
-            volume_normalization=volume_normalization,
-        )
-    else:
-        raise ValueError(
-            f'view_direction must be either "RZ" or "PhiR", not {view_direction}'
-        )
-
-
-def slice_of_phir_data(
-    self,
-    dataset: np.ndarray,
-    slice_index=0,
-    volume_normalization: bool = True,
-):
-    actual = np.linspace(self.phi_grid[0], self.phi_grid[-1], self.dimension[1])
-    expected = np.linspace(self.r_grid[0], self.r_grid[-1], self.dimension[0])
-
-    rad, theta = np.meshgrid(expected, actual)
-
-    # old method which suffered from errors reshaping but avoided using pandas
-    # lower_index = int(slice_index * (len(self.phi_grid) - 1))
-    # upper_index = int((slice_index + 1) * (len(self.phi_grid) - 1))
-
-    # print(dataset.flatten())
-    # # both order A and C appear to work
-    # # values=dataset.flatten().reshape(-1,len(self.r_grid)-1,order='C')[:len(self.phi_grid)-1]
-    # values = dataset.flatten().reshape(-1, len(self.r_grid) - 1, order="A")[
-    #     lower_index:upper_index
-    # ]
-
-    # return theta, r, values
-    indices = list(self.indices)
-
-    r = [entry[0] for entry in indices]
-    phi = [entry[1] for entry in indices]
-    z = [entry[2] for entry in indices]
-
-    df = pd.DataFrame(
-        {
-            "r": r,
-            "phi": phi,
-            "z": z,
-            "value": dataset,
-            "volume": self.volumes.flatten(),
-            "normalised_value": dataset / self.volumes.flatten(),
-        }
+if version.parse(openmc.__version__) < version.parse("0.13.3"):
+    msg = (
+        "openmc_regular_mesh_plotter package requires OpenMC version 0.13.4 "
+        f"or newer. You currently have OpenMC version {openmc.__version__}"
     )
-    df_slice = df[df["z"] == slice_index]
+    raise ValueError(msg)
+
+_BASES = ["rz", "phiz"]
+
+_default_outline_kwargs = {"colors": "black", "linestyles": "solid", "linewidths": 1}
+
+
+def plot_mesh_tally(
+    tally: "openmc.Tally",
+    basis: str = "rz",
+    slice_index: Optional[int] = None,
+    score: Optional[str] = None,
+    axes: Optional[str] = None,
+    axis_units: str = "cm",
+    value: str = "mean",
+    outline: bool = False,
+    outline_by: str = "cell",
+    geometry: Optional["openmc.Geometry"] = None,
+    pixels: int = 40000,
+    colorbar: bool = True,
+    volume_normalization: bool = True,
+    scaling_factor: Optional[float] = None,
+    colorbar_kwargs: dict = {},
+    outline_kwargs: dict = _default_outline_kwargs,
+    **kwargs,
+) -> "matplotlib.image.AxesImage":
+    """Display a slice plot of the mesh tally score.
+    Parameters
+    ----------
+    tally : openmc.Tally
+        The openmc tally to plot. Tally must contain a MeshFilter that uses a CylindricalMesh.
+    basis : {'rz', 'phiz'}
+        The basis directions for the plot
+    slice_index : int
+        The mesh index to plot
+    score : str
+        Score to plot, e.g. 'flux'
+    axes : matplotlib.Axes
+        Axes to draw to
+    axis_units : {'km', 'm', 'cm', 'mm'}
+        Units used on the plot axis
+    value : str
+        A string for the type of value to return  - 'mean' (default),
+        'std_dev', 'rel_err', 'sum', or 'sum_sq' are accepted
+    outline : True
+        If set then an outline will be added to the plot. The outline can be
+        by cell or by material.
+    outline_by : {'cell', 'material'}
+        Indicate whether the plot should be colored by cell or by material
+    geometry : openmc.Geometry
+        The geometry to use for the outline.
+    pixels : int
+        This sets the total number of pixels in the plot and the number of
+        pixels in each basis direction is calculated from this total and
+        the image aspect ratio.
+    colorbar : bool
+        Whether or not to add a colorbar to the plot.
+    volume_normalization : bool, optional
+        Whether or not to normalize the data by the volume of the mesh elements.
+    scaling_factor : float
+        A optional multiplier to apply to the tally data prior to ploting.
+    colorbar_kwargs : dict
+        Keyword arguments passed to :func:`matplotlib.colorbar.Colorbar`.
+    outline_kwargs : dict
+        Keyword arguments passed to :func:`matplotlib.pyplot.contour`.
+    **kwargs
+        Keyword arguments passed to :func:`matplotlib.pyplot.imshow`
+    Returns
+    -------
+    matplotlib.image.AxesImage
+        Resulting image
+    """
+
+    cv.check_value("basis", basis, _BASES)
+    cv.check_value("axis_units", axis_units, ["km", "m", "cm", "mm"])
+    cv.check_type("volume_normalization", volume_normalization, bool)
+    cv.check_type("outline", outline, bool)
+
+    mesh = tally.find_filter(filter_type=openmc.MeshFilter).mesh
+    if not isinstance(mesh, openmc.CylindricalMesh):
+        raise NotImplemented(
+            f"Only CylindricalMesh are currently supported not {type(mesh)}"
+        )
+    # if mesh.n_dimension != 3:
+    #     msg = "Your mesh has {mesh.n_dimension} dimension and currently only CylindricalMesh with 3 dimensions are supported"
+    #     raise NotImplementedError(msg)
+
+    # if score is not specified and tally has a single score then we know which score to use
+    if score is None:
+        if len(tally.scores) == 1:
+            score = tally.scores[0]
+        else:
+            msg = "score was not specified and there are multiple scores in the tally."
+            raise ValueError(msg)
+
+    tally_slice = tally.get_slice(scores=[score])
+
+    tally_data = tally_slice.get_reshaped_data(expand_dims=True, value=value).squeeze()
+
+    if slice_index is None:
+        basis_to_index = {"rz": 1, "phir": 0}[basis] #todo check phir
+        slice_index = int(tally_data.shape[basis_to_index] / 2)
+
+    if basis == "rz":
+        slice_data = tally_data[:, slice_index, :]
+        data = np.rot90(slice_data, -1)
+        xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
+    else:  # basis == 'phir'
+        # todo
+        pass
 
     if volume_normalization:
-        shaped_slice = (
-            df_slice["normalised_value"].to_numpy().reshape(-1, len(self.r_grid) - 1)
-        )
+        slice_volumes = mesh.volumes[:, slice_index, :]
+        data = data / slice_volumes
+
+    if scaling_factor:
+        data = data * scaling_factor
+
+    axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
+
+    if basis == 'rz':
+        extent = [
+            mesh.r_grid[0], mesh.r_grid[-1], mesh.z_grid[0], mesh.z_grid[-1]
+        ]
     else:
-        shaped_slice = df_slice["value"].to_numpy().reshape(-1, len(self.r_grid) - 1)
+        raise NotImplementedError('todo extent for phi basis plot')
 
-    return theta, rad, shaped_slice
+    x_min, x_max, y_min, y_max = [
+        i * axis_scaling_factor for i in extent
+    ]
 
+    if axes is None:
+        fig, axes = plt.subplots()
+        axes.set_xlabel(xlabel)
+        axes.set_ylabel(ylabel)
 
-def slice_of_rz_data(
-    self,
-    dataset: np.ndarray,
-    slice_index=0,
-    volume_normalization: bool = True,
-):
-    # old method which suffered from errors reshaping but avoided using pandas
-    # lower_index = int(slice_index * (len(self.r_grid) - 1))
-    # upper_index = int((slice_index + 1) * (len(self.r_grid) - 1))
+    im = axes.imshow(data, extent=(x_min, x_max, y_min, y_max), **kwargs)
 
-    # if volume_normalization:
-    #     data_slice = dataset.flatten().reshape(-1, len(self.z_grid) - 1, order="F")[
-    #         lower_index:upper_index
-    #     ]
-    #     data_slice = data_slice / self.volumes[:, 1, :]
+    if colorbar:
+        fig.colorbar(im, **colorbar_kwargs)
 
-    #     return np.rot90(data_slice)
+    if outline and geometry is not None:
+        import matplotlib.image as mpimg
 
-    # data_slice = dataset.flatten().reshape(-1, len(self.z_grid) - 1, order="F")[
-    #     lower_index:upper_index
-    # ]
+        # code to make sure geometry outline is in the middle of the mesh voxel
+        # two of the three dimensions are just in the center of the mesh
+        # but the slice can move one axis off the center so this needs calculating
+        x0, y0, z0 = mesh.lower_left
+        x1, y1, z1 = mesh.upper_right
+        nx, ny, nz = mesh.dimension
+        center_of_mesh = mesh.bounding_box.center
+        if basis == "xy":
+            zarr = np.linspace(z0, z1, nz + 1)
+            center_of_mesh_slice = [
+                center_of_mesh[0],
+                center_of_mesh[1],
+                (zarr[slice_index] + zarr[slice_index + 1]) / 2,
+            ]
+        if basis == "xz":
+            yarr = np.linspace(y0, y1, ny + 1)
+            center_of_mesh_slice = [
+                center_of_mesh[0],
+                (yarr[slice_index] + yarr[slice_index + 1]) / 2,
+                center_of_mesh[2],
+            ]
+        if basis == "yz":
+            xarr = np.linspace(x0, x1, nx + 1)
+            center_of_mesh_slice = [
+                (xarr[slice_index] + xarr[slice_index + 1]) / 2,
+                center_of_mesh[1],
+                center_of_mesh[2],
+            ]
 
-    # return np.rot90(data_slice)
+        model = openmc.Model()
+        model.geometry = geometry
+        plot = openmc.Plot()
+        plot.origin = center_of_mesh_slice
+        bb_width = mesh.bounding_box.extent[basis]
+        plot.width = (bb_width[0] - bb_width[1], bb_width[2] - bb_width[3])
+        aspect_ratio = (bb_width[0] - bb_width[1]) / (bb_width[2] - bb_width[3])
+        pixels_y = math.sqrt(pixels / aspect_ratio)
+        pixels = (int(pixels / pixels_y), int(pixels_y))
+        plot.pixels = pixels
+        plot.basis = basis
+        plot.color_by = outline_by
+        model.plots.append(plot)
 
-    indices = list(self.indices)
+        with TemporaryDirectory() as tmpdir:
+            # Run OpenMC in geometry plotting mode
+            model.plot_geometry(False, cwd=tmpdir)
 
-    r = [entry[0] for entry in indices]
-    phi = [entry[1] for entry in indices]
-    z = [entry[2] for entry in indices]
+            # Read image from file
+            img_path = Path(tmpdir) / f"plot_{plot.id}.png"
+            if not img_path.is_file():
+                img_path = img_path.with_suffix(".ppm")
+            img = mpimg.imread(str(img_path))
 
-    df = pd.DataFrame(
-        {
-            "r": r,
-            "phi": phi,
-            "z": z,
-            "value": dataset,
-            "volume": self.volumes.flatten(),
-            "normalised_value": dataset / self.volumes.flatten(),
-        }
-    )
-    df_slice = df[df["phi"] == slice_index]
+        # Combine R, G, B values into a single int
+        rgb = (img * 256).astype(int)
+        image_value = (rgb[..., 0] << 16) + (rgb[..., 1] << 8) + (rgb[..., 2])
 
-    if volume_normalization:
-        shaped_slice = (
-            df_slice["normalised_value"].to_numpy().reshape(-1, len(self.r_grid) - 1)
+        if basis == "xz":
+            image_value = np.rot90(image_value, 2)
+        elif basis == "yz":
+            image_value = np.rot90(image_value, 2)
+        else:  # basis == 'xy'
+            image_value = np.rot90(image_value, 2)
+
+        # Plot image and return the axes
+        axes.contour(
+            image_value,
+            origin="upper",
+            levels=np.unique(image_value),
+            extent=(x_min, x_max, y_min, y_max),
+            **outline_kwargs,
         )
-    else:
-        shaped_slice = df_slice["value"].to_numpy().reshape(-1, len(self.r_grid) - 1)
 
-    return np.flipud(shaped_slice)
-
-
-def get_mpl_plot_extent(self, view_direction="RZ"):
-    """Returns the (x_min, x_max, y_min, y_max) of the mesh based on the
-    r_grid and z_grid."""
-    if view_direction == "RZ":
-        left = self.r_grid[0]
-        right = self.r_grid[-1]
-        bottom = self.z_grid[0]
-        top = self.z_grid[-1]
-        return (left, right, bottom, top)
-    elif view_direction == "PhiR":
-        print("extent has not been implemented for PhiR slices")
-
-
-def get_axis_labels(self, view_direction="RZ"):
-    """Returns two axis label values for the x and y value. Takes
-    view_direction into account."""
-    if view_direction == "RZ":
-        xlabel = "R [cm]"
-        ylabel = "Z [cm]"
-    elif view_direction == "PhiR":
-        xlabel = "R [cm]"
-        ylabel = "Phi"
-
-    return xlabel, ylabel
-
-
-def get_tallies_with_cylindrical_mesh_filters(statepoint: openmc.StatePoint):
-    """scans the statepoint object to find all tallies and with cylindrical mesh
-    filters, returns a list of tally indexes"""
-
-    matching_tally_ids = []
-    for tally_id, tally in statepoint.tallies.items():
-        print("tally id", tally_id)
-        try:
-            mf = tally.find_filter(filter_type=openmc.MeshFilter)
-            if isinstance(mf.mesh, openmc.CylindricalMesh):
-                matching_tally_ids.append(tally.id)
-                print("found regmeshfilter")
-        except ValueError:
-            mf = None
-
-    return sorted(matching_tally_ids)
-
-
-def get_cylindricalmesh_tallies_and_scores(statepoint: openmc.StatePoint):
-    """scans the statepoint object to find all tallies and scores,
-    returns list of dictionaries. Each dictionary contains tally id,
-    score and tally name"""
-
-    tallies_of_interest = get_tallies_with_cylindrical_mesh_filters(statepoint)
-
-    tally_score_info = []
-    for tally_id in tallies_of_interest:
-        tally = statepoint.tallies[tally_id]
-        for score in tally.scores:
-            entry = {"id": tally.id, "score": score, "name": tally.name}
-            tally_score_info.append(entry)
-
-    return tally_score_info
-
-
-def get_number_of_slices(self, view_direction: str):
-    if view_direction == "RZ":
-        return self.dimension[1]
-
-    elif view_direction == "PhiR":
-        return self.dimension[2]
-
-
-openmc.CylindricalMesh.get_number_of_slices = get_number_of_slices
-openmc.mesh.CylindricalMesh.get_number_of_slices = get_number_of_slices
-
-openmc.CylindricalMesh.slice_of_data = slice_of_data
-openmc.mesh.CylindricalMesh.slice_of_data = slice_of_data
-
-openmc.CylindricalMesh.get_axis_labels = get_axis_labels
-openmc.mesh.CylindricalMesh.get_axis_labels = get_axis_labels
-
-openmc.CylindricalMesh.get_mpl_plot_extent = get_mpl_plot_extent
-openmc.mesh.CylindricalMesh.get_mpl_plot_extent = get_mpl_plot_extent
+    return axes

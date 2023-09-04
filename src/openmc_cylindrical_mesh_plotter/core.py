@@ -33,6 +33,7 @@ def plot_mesh_tally(
     outline: bool = False,
     outline_by: str = "cell",
     geometry: Optional["openmc.Geometry"] = None,
+    geometry_basis: 'xy',
     pixels: int = 40000,
     colorbar: bool = True,
     volume_normalization: bool = True,
@@ -114,24 +115,30 @@ def plot_mesh_tally(
 
     tally_data = tally_slice.get_reshaped_data(expand_dims=True, value=value).squeeze()
 
+    print('tally_data.shape', tally_data.shape)
+
     if slice_index is None:
-        basis_to_index = {"rz": 1, "phir": 0}[basis] #todo check phir
+        basis_to_index = {"rz": 1, "phir": 0}[basis]  # todo check phir
         slice_index = int(tally_data.shape[basis_to_index] / 2)
 
     if basis == "rz":
-        slice_data = tally_data[:, slice_index, :]
-        data = np.rot90(slice_data, 1)
+        data = tally_data[:, slice_index, :]
+        # data = np.rot90(slice_data, 1)
         xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     else:  # basis == 'phir'
         # todo
         pass
 
+    print('data.shape', data.shape)
     if volume_normalization:
         slice_volumes = mesh.volumes[:, slice_index, :]
-        data = data / np.rot90(slice_volumes, 1)
+        data = data / slice_volumes
 
     if scaling_factor:
         data = data * scaling_factor
+
+    if basis == "rz":
+        data = np.rot90(data, 1)
 
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
 
@@ -164,43 +171,47 @@ def plot_mesh_tally(
         # but the slice can move one axis off the center so this needs calculating
         x0, y0, z0 = mesh.lower_left
         x1, y1, z1 = mesh.upper_right
+        xo, yo, zo = mesh.origin
         nx, ny, nz = mesh.dimension
+
+        xc = (xo + x1) / 2
+        yc = (yo + y1) / 2
+        zc = mesh.bounding_box.center[2]
+        print(' mesh.bounding_box',  mesh.bounding_box)
+
+        width_x = (xo+x1)
+        width_y = (yo+y1)
+        width_z = (zo+z1)
+
         center_of_mesh = mesh.bounding_box.center
-        if basis == "xy":
-            zarr = np.linspace(z0, z1, nz + 1)
-            center_of_mesh_slice = [
-                center_of_mesh[0],
-                center_of_mesh[1],
-                (zarr[slice_index] + zarr[slice_index + 1]) / 2,
-            ]
-        if basis == "xz":
-            yarr = np.linspace(y0, y1, ny + 1)
-            center_of_mesh_slice = [
-                center_of_mesh[0],
-                (yarr[slice_index] + yarr[slice_index + 1]) / 2,
-                center_of_mesh[2],
-            ]
-        if basis == "yz":
-            xarr = np.linspace(x0, x1, nx + 1)
-            center_of_mesh_slice = [
-                (xarr[slice_index] + xarr[slice_index + 1]) / 2,
-                center_of_mesh[1],
-                center_of_mesh[2],
-            ]
+        if basis == "rz":
+            center_of_mesh_slice = [xc, 0., zc]
+        if basis == "phir":
+            raise NotImplementedError("outline with phir basis is not yet supported, contributions are welcome :-)")
+
+        geometry_basis='xz' # TODO allow rz to result in xy or yz
+
+        print('mesh.bounding_box.center', mesh.bounding_box.center)
+        print('center_of_mesh_slice', center_of_mesh_slice)
+        print('mesh.origin', mesh.origin)
+# mesh.bounding_box.center [0. 0. 0.]
+# center_of_mesh_slice [1250.0, 1250.0, 0.0]
+# mesh.origin [0. 0. 0.]
 
         model = openmc.Model()
         model.geometry = geometry
         plot = openmc.Plot()
-        plot.origin = center_of_mesh_slice
-        bb_width = mesh.bounding_box.extent[basis]
-        plot.width = (bb_width[0] - bb_width[1], bb_width[2] - bb_width[3])
-        aspect_ratio = (bb_width[0] - bb_width[1]) / (bb_width[2] - bb_width[3])
+        plot.origin = (0.5*width_x,0.,0.5*width_z)#(1250, 0 , 1000)#center_of_mesh_slice
+        # bb_width = mesh.bounding_box.extent[basis]
+        plot.width = (width_x, width_z) # tod might use width y if yz basis used
+        aspect_ratio = width_x / width_y
         pixels_y = math.sqrt(pixels / aspect_ratio)
         pixels = (int(pixels / pixels_y), int(pixels_y))
         plot.pixels = pixels
-        plot.basis = basis
+        plot.basis = geometry_basis
         plot.color_by = outline_by
         model.plots.append(plot)
+        print(plot)
 
         with TemporaryDirectory() as tmpdir:
             # Run OpenMC in geometry plotting mode
@@ -216,11 +227,12 @@ def plot_mesh_tally(
         rgb = (img * 256).astype(int)
         image_value = (rgb[..., 0] << 16) + (rgb[..., 1] << 8) + (rgb[..., 2])
 
-        if basis == "xz":
+        if geometry_basis == "xz":
+            pass
+            # image_value = np.rot90(image_value, 2)
+        elif geometry_basis == "yz":
             image_value = np.rot90(image_value, 2)
-        elif basis == "yz":
-            image_value = np.rot90(image_value, 2)
-        else:  # basis == 'xy'
+        else:  # geometry_basis == 'xy'
             image_value = np.rot90(image_value, 2)
 
         # Plot image and return the axes

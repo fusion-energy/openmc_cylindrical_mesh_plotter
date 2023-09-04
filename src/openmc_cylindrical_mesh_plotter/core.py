@@ -142,16 +142,12 @@ def plot_mesh_tally(
 
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
 
-    if basis == 'rz':
-        extent = [
-            mesh.r_grid[0], mesh.r_grid[-1], mesh.z_grid[0], mesh.z_grid[-1]
-        ]
+    if basis == "rz":
+        extent = [mesh.r_grid[0], mesh.r_grid[-1], mesh.z_grid[0], mesh.z_grid[-1]]
     else:
-        raise NotImplementedError('todo extent for phi basis plot')
+        raise NotImplementedError("todo extent for phi basis plot")
 
-    x_min, x_max, y_min, y_max = [
-        i * axis_scaling_factor for i in extent
-    ]
+    x_min, x_max, y_min, y_max = [i * axis_scaling_factor for i in extent]
 
     if axes is None:
         fig, axes = plt.subplots()

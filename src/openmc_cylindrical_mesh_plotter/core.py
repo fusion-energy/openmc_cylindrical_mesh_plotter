@@ -116,10 +116,18 @@ def plot_mesh_tally_rz_slice(
     if slice_index is None:
         slice_index = int(tally_data.shape[1] / 2)  # index 1 is the phi value
 
-    data = tally_data[:, slice_index, :]
+    if len(tally_data.shape) == 3:
+        data = tally_data[:, slice_index, :]
+    elif len(tally_data.shape) == 2:
+        data = tally_data[:, :]
+    else:
+        raise NotImplementedError("Mesh is not 3d or 2d, can't plot")
 
     if volume_normalization:
-        slice_volumes = mesh.volumes[:, slice_index, :]
+        if len(tally_data.shape) == 3:
+            slice_volumes = mesh.volumes[:, slice_index, :].squeeze()
+        elif len(tally_data.shape) == 2:
+            slice_volumes = mesh.volumes[:, :].squeeze()
         data = data / slice_volumes
 
     if scaling_factor:

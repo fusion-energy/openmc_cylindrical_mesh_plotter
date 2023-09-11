@@ -6,16 +6,15 @@ import openmc
 import numpy as np
 from math import pi
 import matplotlib.pyplot as plt
-import openmc_cylindrical_mesh_plotter  # adds slice_of_data method to CylindricalMesh
+from openmc_cylindrical_mesh_plotter import plot_mesh_tally_phir_slice
 from matplotlib import ticker
 from math import pi
 
-mesh = openmc.CylindricalMesh()
-mesh.phi_grid = np.linspace(
-    0.0, 1.5 * pi, 10
+mesh = openmc.CylindricalMesh(
+    phi_grid = np.linspace(0.0, 2 * pi, 100),
+    r_grid = np.linspace(0, 10, 20),
+    z_grid = np.linspace(0, 5, 4)
 )  # note the mesh is 3/4 of a circle, not the full 2pi
-mesh.r_grid = np.linspace(0, 10, 20)
-mesh.z_grid = np.linspace(0, 5, 4)
 
 tally = openmc.Tally(name="my_tally")
 mesh_filter = openmc.MeshFilter(mesh)
@@ -66,22 +65,6 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-for slice_index in range(1, len(mesh.z_grid)):
-    theta, r, values = mesh.slice_of_data(
-        dataset=my_tally_result.mean.flatten(),
-        slice_index=slice_index,
-        view_direction="PhiR",
-        volume_normalization=False,
-    )
-
-    fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
-    im = ax.contourf(
-        theta, r, values, extent=(0, 100, 0, 50)
-    )  # , locator=ticker.LogLocator())
-
-    # sets the y axis limits to match the mesh limits
-    ax.set_ylim(mesh.r_grid[0], mesh.r_grid[-1])
-
-    plt.colorbar(im, label="Flux")
-
-    plt.show()
+for slice_index in range(0, len(mesh.z_grid)):
+    plot = plot_mesh_tally_phir_slice(tally=my_tally_result)
+    plot.figure.savefig(f'{slice_index}.png')

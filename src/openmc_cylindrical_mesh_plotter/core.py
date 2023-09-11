@@ -210,6 +210,7 @@ def plot_mesh_tally_rz_slice(
 
     return axes
 
+
 def plot_mesh_tally_phir_slice(
     tally: "openmc.Tally",
     slice_index: Optional[int] = None,
@@ -320,7 +321,6 @@ def plot_mesh_tally_phir_slice(
     if scaling_factor:
         data = data * scaling_factor
 
-
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
 
@@ -332,19 +332,17 @@ def plot_mesh_tally_phir_slice(
         fig, axes = plt.subplots(subplot_kw=dict(projection="polar"))
         # axes.set_xlabel(xlabel)
         # axes.set_ylabel(ylabel)
-    
-    theta = np.linspace(mesh.phi_grid[0], mesh.phi_grid[-1], len(mesh.phi_grid)-1)
-    r = np.linspace(mesh.r_grid[0], mesh.r_grid[-1], len(mesh.r_grid)-1)
 
-    print('theta',len(theta))
-    print('r',len(r))
-    
+    theta = np.linspace(mesh.phi_grid[0], mesh.phi_grid[-1], len(mesh.phi_grid) - 1)
+    r = np.linspace(mesh.r_grid[0], mesh.r_grid[-1], len(mesh.r_grid) - 1)
+
+    print("theta", len(theta))
+    print("r", len(r))
+
     # data = np.rot90(data, 1)
-    print('data',data.shape)
+    print("data", data.shape)
 
-    im = axes.contourf(
-        theta[:], r[:], data, extent=(0, 100, 0, 50), **kwargs
-    )
+    im = axes.contourf(theta[:], r[:], data, extent=(0, 100, 0, 50), **kwargs)
 
     if colorbar:
         fig.colorbar(im, **colorbar_kwargs)

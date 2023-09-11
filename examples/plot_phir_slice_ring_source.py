@@ -11,9 +11,9 @@ from matplotlib import ticker
 from math import pi
 
 mesh = openmc.CylindricalMesh(
-    phi_grid = np.linspace(0.0, 2 * pi, 100),
-    r_grid = np.linspace(0, 10, 20),
-    z_grid = np.linspace(0, 5, 4)
+    phi_grid=np.linspace(0.0, 2 * pi, 100),
+    r_grid=np.linspace(0, 10, 20),
+    z_grid=np.linspace(0, 5, 4),
 )  # note the mesh is 3/4 of a circle, not the full 2pi
 
 tally = openmc.Tally(name="my_tally")
@@ -67,4 +67,4 @@ my_tally_result = statepoint.get_tally(name="my_tally")
 
 for slice_index in range(0, len(mesh.z_grid)):
     plot = plot_mesh_tally_phir_slice(tally=my_tally_result)
-    plot.figure.savefig(f'{slice_index}.png')
+    plot.figure.savefig(f"{slice_index}.png")

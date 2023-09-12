@@ -161,9 +161,9 @@ def plot_mesh_tally_rz_slice(
         x1, y1, z1 = mesh.upper_right
         x_origin, y_origin, z_origin = mesh.origin
 
-        width_x = x_origin + x1
-        width_y = y_origin + y1
-        width_z = z_origin + z1
+        width_x = abs(x_origin + x1)
+        width_y = abs(y_origin + y1)
+        width_z = abs(z_origin + z1)
 
         model = openmc.Model()
         model.geometry = geometry

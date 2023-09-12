@@ -14,9 +14,10 @@ my_materials = openmc.Materials([material])
 
 inner_surface = openmc.Sphere(r=20)
 outer_surface = openmc.model.RectangularParallelepiped(
-    0,100,0,100,0,100, boundary_type="vacuum")
-cell_inner = openmc.Cell(region=-outer_surface&-inner_surface, fill=material)
-cell_outer = openmc.Cell(region=-outer_surface&+inner_surface, fill=material)
+    0, 100, 0, 100, 0, 100, boundary_type="vacuum"
+)
+cell_inner = openmc.Cell(region=-outer_surface & -inner_surface, fill=material)
+cell_outer = openmc.Cell(region=-outer_surface & +inner_surface, fill=material)
 
 my_geometry = openmc.Geometry([cell_inner, cell_outer])
 

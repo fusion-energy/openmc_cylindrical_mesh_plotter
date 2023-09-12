@@ -10,9 +10,9 @@ from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice
 from matplotlib.colors import LogNorm
 
 mesh = openmc.CylindricalMesh(
-    phi_grid = np.linspace(0.0, 2 * pi, 3),
-    r_grid = np.linspace(0, 10, 20),
-    z_grid = np.linspace(0, 5, 10),
+    phi_grid=np.linspace(0.0, 2 * pi, 3),
+    r_grid=np.linspace(0, 10, 20),
+    z_grid=np.linspace(0, 5, 10),
 )
 
 tally = openmc.Tally(name="my_tally")
@@ -65,11 +65,9 @@ my_tally_result = statepoint.get_tally(name="my_tally")
 
 for slice_index in range(1, len(mesh.phi_grid)):
     plot = plot_mesh_tally_rz_slice(
-        tally=my_tally_result,
-        geometry=my_geometry,
-        norm=LogNorm()
+        tally=my_tally_result, geometry=my_geometry, norm=LogNorm()
     )
-    plot.figure.savefig(f'rz_{slice_index}.png')
+    plot.figure.savefig(f"rz_{slice_index}.png")
     # data = mesh.slice_of_data(
     #     dataset=my_tally_result.mean.flatten(),
     #     view_direction="RZ",

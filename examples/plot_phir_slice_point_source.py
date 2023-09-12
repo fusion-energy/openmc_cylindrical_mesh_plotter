@@ -5,22 +5,24 @@
 import openmc
 import numpy as np
 from math import pi
-import openmc_cylindrical_mesh_plotter as cmp  # adds slice_of_data method to CylindricalMesh
-
+from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice
 
 material = openmc.Material()
 material.add_nuclide("Fe56", 1)
 material.set_density("g/cm3", 0.1)
 my_materials = openmc.Materials([material])
 
-outer_surface = openmc.Sphere(r=100, boundary_type="vacuum")
-cell = openmc.Cell(region=-outer_surface, fill=material)
+inner_surface = openmc.Sphere(r=20)
+outer_surface = openmc.model.RectangularParallelepiped(
+    0,100,0,100,0,100, boundary_type="vacuum")
+cell_inner = openmc.Cell(region=-outer_surface&-inner_surface, fill=material)
+cell_outer = openmc.Cell(region=-outer_surface&+inner_surface, fill=material)
 
-my_geometry = openmc.Geometry([cell])
+my_geometry = openmc.Geometry([cell_inner, cell_outer])
 
 my_source = openmc.IndependentSource()
 # this makes a point source instead with
-# my_source.space = openmc.stats.Point((0, -5, 0))
+my_source.space = openmc.stats.Point(my_geometry.bounding_box.center)
 # sets the direction to isotropic
 # my_source.angle = openmc.stats.Isotropic()
 
@@ -48,7 +50,7 @@ statepoint = openmc.StatePoint(sp_filename)
 my_tally_result = statepoint.get_tally(name="my_tally")
 
 for slice_index in range(1, len(mesh.z_grid)):
-    plot = cmp.plot_mesh_tally(
+    plot = plot_mesh_tally_rz_slice(
         tally=my_tally_result, outline=True, geometry=my_geometry
     )
 

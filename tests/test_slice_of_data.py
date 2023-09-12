@@ -9,8 +9,6 @@ from openmc_cylindrical_mesh_plotter import (
 )
 
 
-
-
 @pytest.fixture
 def circular_source_simulation():
     mesh = openmc.CylindricalMesh(
@@ -117,16 +115,13 @@ def point_source_simulation():
     return my_tally_result
 
 
-
 def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation):
     tally = point_source_simulation
     mesh = tally.find_filter(openmc.MeshFilter).mesh
-    for slice_index in range(0, len(mesh.z_grid) -1):
+    for slice_index in range(0, len(mesh.z_grid) - 1):
         plot_mesh_tally_phir_slice(tally=tally, slice_index=slice_index)
-    for slice_index in range(0, len(mesh.phi_grid) -1):
+    for slice_index in range(0, len(mesh.phi_grid) - 1):
         plot_mesh_tally_rz_slice(tally=tally, slice_index=slice_index)
-
-
 
 
 def test_phir_slice_of_data_circular_simulation_normalization(
@@ -134,10 +129,7 @@ def test_phir_slice_of_data_circular_simulation_normalization(
 ):
     tally = circular_source_simulation
     mesh = tally.find_filter(openmc.MeshFilter).mesh
-    for slice_index in range(0, len(mesh.z_grid)-1):
+    for slice_index in range(0, len(mesh.z_grid) - 1):
         plot_mesh_tally_phir_slice(tally=tally, slice_index=slice_index)
-    for slice_index in range(0, len(mesh.phi_grid)-1):
+    for slice_index in range(0, len(mesh.phi_grid) - 1):
         plot_mesh_tally_rz_slice(tally=tally, slice_index=slice_index)
-
-
-

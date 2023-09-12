@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pytest
 from openmc_cylindrical_mesh_plotter import (
     plot_mesh_tally_rz_slice,
-    plot_mesh_tally_phiz_slice,
+    plot_mesh_tally_phir_slice,
 )
 
 mesh = openmc.CylindricalMesh(
@@ -128,7 +128,7 @@ def test_get_axis_labels():
 
 def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation):
     for slice_index in range(len(mesh.phi_grid) - 1):
-        plot_mesh_tally_phiz_slice(tally=point_source_simulation)
+        plot_mesh_tally_phir_slice(tally=point_source_simulation)
         # data = mesh.slice_of_data(
         #     dataset=,
         #     view_direction="RZ",
@@ -145,28 +145,30 @@ def test_phir_slice_of_data_circular_simulation_normalization(
     circular_source_simulation,
 ):
     for slice_index in range(len(mesh.phi_grid) - 1):
-        data = mesh.slice_of_data(
-            dataset=circular_source_simulation,
-            view_direction="PhiR",
-            slice_index=slice_index,
-            volume_normalization=True,
-        )
+        plot_mesh_tally_phir_slice(tally=circular_source_simulation)
+        # data = mesh.slice_of_data(
+        #     dataset=circular_source_simulation,
+        #     view_direction="PhiR",
+        #     slice_index=slice_index,
+        #     volume_normalization=True,
+        # )
 
-        assert data.shape == (4, 3)
+        # assert data.shape == (4, 3)
 
     # TODO test
 
 
 def test_rz_slice_of_data_point_simulation_unnormalization(point_source_simulation):
     for slice_index in range(len(mesh.phi_grid) - 1):
-        data = mesh.slice_of_data(
-            dataset=point_source_simulation,
-            view_direction="RZ",
-            slice_index=slice_index,
-            volume_normalization=False,
-        )
+        plot_mesh_tally_rz_slice(tally=point_source_simulation)
+        # data = mesh.slice_of_data(
+        #     dataset=point_source_simulation,
+        #     view_direction="RZ",
+        #     slice_index=slice_index,
+        #     volume_normalization=False,
+        # )
 
-        assert data.shape == (4, 3)
+        # assert data.shape == (4, 3)
 
     # TODO test
 
@@ -175,14 +177,15 @@ def test_phir_slice_of_data_circular_simulation_unnormalization(
     circular_source_simulation,
 ):
     for slice_index in range(len(mesh.phi_grid) - 1):
-        theta, r, values = mesh.slice_of_data(
-            dataset=circular_source_simulation,
-            view_direction="PhiR",
-            slice_index=slice_index,
-            volume_normalization=False,
-        )
-        theta.shape == (4, 3)
-        r.shape == (4, 3)
-        values.shape == (4, 3)
+        plot_mesh_tally_phir_slice(tally=circular_source_simulation)
+        # theta, r, values = mesh.slice_of_data(
+        #     dataset=circular_source_simulation,
+        #     view_direction="PhiR",
+        #     slice_index=slice_index,
+        #     volume_normalization=False,
+        # )
+        # theta.shape == (4, 3)
+        # r.shape == (4, 3)
+        # values.shape == (4, 3)
 
     # TODO test

@@ -3,12 +3,15 @@ import numpy as np
 from math import pi
 import matplotlib.pyplot as plt
 import pytest
-from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice, plot_mesh_tally_phiz_slice 
+from openmc_cylindrical_mesh_plotter import (
+    plot_mesh_tally_rz_slice,
+    plot_mesh_tally_phiz_slice,
+)
 
 mesh = openmc.CylindricalMesh(
-    phi_grid = np.linspace(0.0, 2 * pi, 10),
-    r_grid = np.linspace(0, 10, 4),
-    z_grid = np.linspace(0, 5, 5),
+    phi_grid=np.linspace(0.0, 2 * pi, 10),
+    r_grid=np.linspace(0, 10, 4),
+    z_grid=np.linspace(0, 5, 5),
 )
 
 
@@ -67,9 +70,9 @@ def circular_source_simulation():
 @pytest.fixture
 def point_source_simulation():
     mesh = openmc.CylindricalMesh(
-        phi_grid = np.linspace(0.0, 2 * pi, 10),
-        r_grid = np.linspace(0, 10, 4),
-        z_grid = np.linspace(0, 5, 5)
+        phi_grid=np.linspace(0.0, 2 * pi, 10),
+        r_grid=np.linspace(0, 10, 4),
+        z_grid=np.linspace(0, 5, 5),
     )
 
     tally = openmc.Tally(name="my_tally")
@@ -125,9 +128,7 @@ def test_get_axis_labels():
 
 def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation):
     for slice_index in range(len(mesh.phi_grid) - 1):
-        plot_mesh_tally_phiz_slice(
-            tally=point_source_simulation
-        )
+        plot_mesh_tally_phiz_slice(tally=point_source_simulation)
         # data = mesh.slice_of_data(
         #     dataset=,
         #     view_direction="RZ",
@@ -158,7 +159,6 @@ def test_phir_slice_of_data_circular_simulation_normalization(
 
 def test_rz_slice_of_data_point_simulation_unnormalization(point_source_simulation):
     for slice_index in range(len(mesh.phi_grid) - 1):
-        
         data = mesh.slice_of_data(
             dataset=point_source_simulation,
             view_direction="RZ",

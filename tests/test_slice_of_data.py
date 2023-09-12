@@ -8,15 +8,16 @@ from openmc_cylindrical_mesh_plotter import (
     plot_mesh_tally_phir_slice,
 )
 
-mesh = openmc.CylindricalMesh(
-    phi_grid=np.linspace(0.0, 2 * pi, 10),
-    r_grid=np.linspace(0, 10, 4),
-    z_grid=np.linspace(0, 5, 5),
-)
+
 
 
 @pytest.fixture
 def circular_source_simulation():
+    mesh = openmc.CylindricalMesh(
+        phi_grid=np.linspace(0.0, 2 * pi, 10),
+        r_grid=np.linspace(0, 10, 4),
+        z_grid=np.linspace(0, 5, 5),
+    )
     tally = openmc.Tally(name="my_tally")
     mesh_filter = openmc.MeshFilter(mesh)
     tally.filters.append(mesh_filter)
@@ -116,76 +117,27 @@ def point_source_simulation():
     return my_tally_result
 
 
-def test_get_mpl_plot_extent():
-    pass
-    # todo get extern for both plots polar and imshow
-
-
-def test_get_axis_labels():
-    # todo get labels for both plots polar and imshow
-    pass
-
 
 def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation):
-    for slice_index in range(len(mesh.phi_grid) - 1):
-        plot_mesh_tally_phir_slice(tally=point_source_simulation)
-        # data = mesh.slice_of_data(
-        #     dataset=,
-        #     view_direction="RZ",
-        #     slice_index=slice_index,
-        #     volume_normalization=True,
-        # )
+    tally = point_source_simulation
+    mesh = tally.find_filter(openmc.MeshFilter).mesh
+    for slice_index in range(0, len(mesh.z_grid) -1):
+        plot_mesh_tally_phir_slice(tally=tally, slice_index=slice_index)
+    for slice_index in range(0, len(mesh.phi_grid) -1):
+        plot_mesh_tally_rz_slice(tally=tally, slice_index=slice_index)
 
-        # assert data.shape == (4, 3)
 
-    # TODO test
 
 
 def test_phir_slice_of_data_circular_simulation_normalization(
     circular_source_simulation,
 ):
-    for slice_index in range(len(mesh.phi_grid) - 1):
-        plot_mesh_tally_phir_slice(tally=circular_source_simulation)
-        # data = mesh.slice_of_data(
-        #     dataset=circular_source_simulation,
-        #     view_direction="PhiR",
-        #     slice_index=slice_index,
-        #     volume_normalization=True,
-        # )
-
-        # assert data.shape == (4, 3)
-
-    # TODO test
+    tally = circular_source_simulation
+    mesh = tally.find_filter(openmc.MeshFilter).mesh
+    for slice_index in range(0, len(mesh.z_grid)-1):
+        plot_mesh_tally_phir_slice(tally=tally, slice_index=slice_index)
+    for slice_index in range(0, len(mesh.phi_grid)-1):
+        plot_mesh_tally_rz_slice(tally=tally, slice_index=slice_index)
 
 
-def test_rz_slice_of_data_point_simulation_unnormalization(point_source_simulation):
-    for slice_index in range(len(mesh.phi_grid) - 1):
-        plot_mesh_tally_rz_slice(tally=point_source_simulation)
-        # data = mesh.slice_of_data(
-        #     dataset=point_source_simulation,
-        #     view_direction="RZ",
-        #     slice_index=slice_index,
-        #     volume_normalization=False,
-        # )
 
-        # assert data.shape == (4, 3)
-
-    # TODO test
-
-
-def test_phir_slice_of_data_circular_simulation_unnormalization(
-    circular_source_simulation,
-):
-    for slice_index in range(len(mesh.phi_grid) - 1):
-        plot_mesh_tally_phir_slice(tally=circular_source_simulation)
-        # theta, r, values = mesh.slice_of_data(
-        #     dataset=circular_source_simulation,
-        #     view_direction="PhiR",
-        #     slice_index=slice_index,
-        #     volume_normalization=False,
-        # )
-        # theta.shape == (4, 3)
-        # r.shape == (4, 3)
-        # values.shape == (4, 3)
-
-    # TODO test

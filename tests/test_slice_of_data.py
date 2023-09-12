@@ -1,14 +1,12 @@
 import openmc
 import numpy as np
 from math import pi
-import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import pytest
 from openmc_cylindrical_mesh_plotter import (
     plot_mesh_tally_rz_slice,
     plot_mesh_tally_phir_slice,
 )
-
-
 
 
 @pytest.fixture
@@ -32,8 +30,7 @@ def circular_source_simulation():
     material.set_density("g/cm3", 0.1)
     my_materials = openmc.Materials([material])
 
-    universe = openmc.Universe(cells=[cell])
-    my_geometry = openmc.Geometry(universe)
+    my_geometry = openmc.Geometry([cell])
 
     my_source = openmc.IndependentSource()
 
@@ -90,8 +87,7 @@ def point_source_simulation():
     material.set_density("g/cm3", 0.1)
     my_materials = openmc.Materials([material])
 
-    universe = openmc.Universe(cells=[cell])
-    my_geometry = openmc.Geometry(universe)
+    my_geometry = openmc.Geometry([cell])
 
     my_source = openmc.IndependentSource()
 
@@ -117,7 +113,6 @@ def point_source_simulation():
     return my_tally_result
 
 
-
 def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation):
     tally = point_source_simulation
     mesh = tally.find_filter(openmc.MeshFilter).mesh
@@ -125,16 +120,36 @@ def test_rz_slice_of_data_point_simulation_normalization(point_source_simulation
         plot_mesh_tally_phir_slice(
             tally=tally,
             slice_index=slice_index,
-            # score not specified as it should be automatically foound
+            # score not specified as it should be automatically found
+            # axes "
+            # axes_units "
+            # value "
+            colorbar=True,
+            volume_normalization=True,
+
         )
+    
+    outer_surface = openmc.Sphere(r=100, boundary_type="vacuum")
+    cell = openmc.Cell(region=-outer_surface)
     for slice_index in range(0, len(mesh.phi_grid) -1):
         plot_mesh_tally_rz_slice(
             tally=tally,
             slice_index=slice_index,
-            score='flux'
+            score='flux',
+            # axes # todo test
+            axis_units='m',
+            value='std_dev',
+            outline=True,
+            outline_by='cell',
+            geometry=openmc.Geometry([cell]),
+            pixels=300,
+            colorbar=False,
+            volume_normalization=False,
+            scaling_factor=10.,
+            colorbar_kwargs={'title':'hi'},
+            outline_kwargs={'color':'red'},
+            norm=LogNorm()
         )
-
-
 
 
 def test_phir_slice_of_data_circular_simulation_normalization(
@@ -142,10 +157,27 @@ def test_phir_slice_of_data_circular_simulation_normalization(
 ):
     tally = circular_source_simulation
     mesh = tally.find_filter(openmc.MeshFilter).mesh
-    for slice_index in range(0, len(mesh.z_grid)-1):
-        plot_mesh_tally_phir_slice(tally=tally, slice_index=slice_index)
-    for slice_index in range(0, len(mesh.phi_grid)-1):
+
+    outer_surface = openmc.Sphere(r=100, boundary_type="vacuum")
+    cell = openmc.Cell(region=-outer_surface)
+    for slice_index in range(0, len(mesh.z_grid) - 1):
+        plot_mesh_tally_rz_slice(
+            tally=tally,
+            slice_index=slice_index,
+            score='flux',
+            # axes # todo test
+            axis_units='m',
+            value='std_dev',
+            outline=True,
+            outline_by='cell',
+            geometry=openmc.Geometry([cell]),
+            pixels=300,
+            colorbar=False,
+            volume_normalization=False,
+            scaling_factor=10.,
+            colorbar_kwargs={'title':'hi'},
+            outline_kwargs={'color':'red'},
+            norm=LogNorm()
+        )
+    for slice_index in range(0, len(mesh.phi_grid) - 1):
         plot_mesh_tally_rz_slice(tally=tally, slice_index=slice_index)
-
-
-

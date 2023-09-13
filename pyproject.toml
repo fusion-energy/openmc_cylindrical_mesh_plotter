@@ -8,7 +8,7 @@ authors = [
   { name="Jonathan Shimwell", email="mail@jshimwell.com" },
 ]
 license = {file = "LICENSE.txt"}
-description = "A Python package for creating publication quality plots of cylindrical mesh tallies"
+description = "A Python package for creating plots of OpenMC cylindrical mesh tallies"
 readme = "README.md"
 requires-python = ">=3.8"
 keywords = ["cylindrical", "mesh", "openmc", "tally", "plot", "slice"]

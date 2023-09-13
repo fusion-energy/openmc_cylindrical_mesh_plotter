@@ -67,20 +67,4 @@ for slice_index in range(1, len(mesh.phi_grid)):
     plot = plot_mesh_tally_rz_slice(
         tally=my_tally_result, geometry=my_geometry, norm=LogNorm()
     )
-    plot.figure.savefig(f"rz_{slice_index}.png")
-    # data = mesh.slice_of_data(
-    #     dataset=my_tally_result.mean.flatten(),
-    #     view_direction="RZ",
-    #     # dataset=np.array(2*19*49*[1]), flat data for testing
-    #     slice_index=slice_index,
-    #     volume_normalization=False,
-    # )
-    # extent = mesh.get_mpl_plot_extent()
-    # x_label, y_label = mesh.get_axis_labels()
-    # plt.xlabel(x_label)
-    # plt.ylabel(y_label)
-    # im = plt.imshow(data, extent=extent)
-
-    # plt.colorbar(im, label="Flux")
-
-    # plt.show()
+    plot.figure.savefig(f"rz_point_source_{slice_index}.png")

@@ -65,6 +65,5 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-for slice_index in range(0, len(mesh.z_grid)):
-    plot = plot_mesh_tally_phir_slice(tally=my_tally_result)
-    plot.figure.savefig(f"{slice_index}.png")
+plot = plot_mesh_tally_phir_slice(tally=my_tally_result)
+plot.figure.savefig(f"phir_ring_source.png")

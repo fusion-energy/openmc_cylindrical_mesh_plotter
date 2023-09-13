@@ -134,13 +134,12 @@ def plot_mesh_tally_rz_slice(
         data = data * scaling_factor
 
     data = np.rot90(data, 1)
-    print(data)
 
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
 
     extent = [mesh.r_grid[0], mesh.r_grid[-1], mesh.z_grid[0], mesh.z_grid[-1]]
-    print('extent', extent)
+
     x_min, x_max, y_min, y_max = [i * axis_scaling_factor for i in extent]
     
 
@@ -185,15 +184,6 @@ def plot_mesh_tally_rz_slice(
         y_center = abs(extent[0] + (width_y/2))
         z_center = abs(extent[2] + width_z*0.5)
 
-        # width_x = (x_max-x_min)*100
-        # width_z = (y_max- y_min)*100
-        print(z_center)
-        print(z_center)
-        print(z_center)
-        print(width_z)
-        print(width_z)
-        print(width_z)
-
         if geometry_basis == "xz":
             plot.origin = (x_center, 0, z_center)
             plot.width = (width_x, width_z)
@@ -202,11 +192,7 @@ def plot_mesh_tally_rz_slice(
             plot.origin = (0, y_center, z_center)
             plot.width = (width_y, width_z)
             aspect_ratio = width_y / width_z
-        
-        # print( width_y , width_z)
 
-        print('pixels',pixels)
-        print('aspect_ratio',aspect_ratio)
         pixels_y = math.sqrt(pixels / aspect_ratio)
         pixels = (int(pixels / pixels_y), int(pixels_y))
         plot.pixels = pixels
@@ -364,12 +350,6 @@ def plot_mesh_tally_phir_slice(
 
     theta = np.linspace(mesh.phi_grid[0], mesh.phi_grid[-1], len(mesh.phi_grid) - 1)
     r = np.linspace(mesh.r_grid[0], mesh.r_grid[-1], len(mesh.r_grid) - 1)
-
-    print("theta", len(theta))
-    print("r", len(r))
-
-    # data = np.rot90(data, 1)
-    print("data", data.shape)
 
     im = axes.contourf(theta[:], r[:], data, extent=(0, 100, 0, 50), **kwargs)
 

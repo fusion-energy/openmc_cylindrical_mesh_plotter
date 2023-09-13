@@ -53,11 +53,11 @@ my_tally_result = statepoint.get_tally(name="my_tally")
 
 plot = plot_mesh_tally_rz_slice(
     tally=my_tally_result,
-    # outline=True,
-    # geometry=my_geometry,
+    outline=True,
+    geometry=my_geometry,
     colorbar_kwargs={'label':'Neutron Flux'},
     volume_normalization=False,
-    # norm=LogNorm()
+    norm=LogNorm()
 )
 
-plot.figure.savefig(f"phir.png")
+plot.figure.savefig(f"phir_point_source.png")

@@ -6,13 +6,14 @@ import openmc
 import numpy as np
 from math import pi
 import matplotlib.pyplot as plt
-import openmc_cylindrical_mesh_plotter  # adds slice_of_data method to CylindricalMesh
+from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice
+from matplotlib.colors import LogNorm
 
-mesh = openmc.CylindricalMesh()
-mesh.phi_grid = np.linspace(0.0, 2 * pi, 3)
-mesh.r_grid = np.linspace(0, 10, 50)
-mesh.z_grid = np.linspace(0, 8, 50)
-
+mesh = openmc.CylindricalMesh(
+    phi_grid = np.linspace(0.0, 2 * pi, 3),
+    r_grid = np.linspace(0, 10, 50),
+    z_grid = np.linspace(0, 8, 50),
+)
 tally = openmc.Tally(name="my_tally")
 mesh_filter = openmc.MeshFilter(mesh)
 tally.filters.append(mesh_filter)
@@ -61,19 +62,11 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-for slice_index in range(1, len(mesh.phi_grid)):
-    data = mesh.slice_of_data(
-        dataset=my_tally_result.mean.flatten(),
-        view_direction="RZ",
-        # dataset=np.array(2*19*49*[1]), flat data for testing
+for slice_index in range(1, len(mesh.phi_grid)-1):
+    plot = plot_mesh_tally_rz_slice(
+        tally=my_tally_result,
+        geometry=my_geometry,
+        norm=LogNorm(),
         slice_index=slice_index,
-        volume_normalization=False,
     )
-    extent = mesh.get_mpl_plot_extent()
-    x_label, y_label = mesh.get_axis_labels()
-    plt.title("Ring source with radius=5, z=4")
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    im = plt.imshow(data, extent=extent)
-    plt.colorbar(im, label="Flux")
-    plt.show()
+    plot.figure.savefig(f"rz_ring_source_{slice_index}.png")

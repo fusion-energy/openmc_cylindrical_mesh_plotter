@@ -1,6 +1,9 @@
 import streamlit as st
 from matplotlib.colors import LogNorm
-from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice, plot_mesh_tally_phir_slice
+from openmc_cylindrical_mesh_plotter import (
+    plot_mesh_tally_rz_slice,
+    plot_mesh_tally_phir_slice,
+)
 import openmc
 
 
@@ -8,6 +11,7 @@ def save_uploadedfile(uploadedfile):
     with open(uploadedfile.name, "wb") as f:
         f.write(uploadedfile.getbuffer())
     return st.success(f"Saved File to {uploadedfile.name}")
+
 
 def get_tallies_with_cylindrical_mesh_filters(statepoint: openmc.StatePoint):
     """scans the statepoint object to find all tallies and with cylindrical mesh
@@ -25,6 +29,7 @@ def get_tallies_with_cylindrical_mesh_filters(statepoint: openmc.StatePoint):
 
     return sorted(matching_tally_ids)
 
+
 def get_cylindricalmesh_tallies_and_scores(statepoint: openmc.StatePoint):
     """scans the statepoint object to find all tallies and scores,
     returns list of dictionaries. Each dictionary contains tally id,
@@ -40,6 +45,7 @@ def get_cylindricalmesh_tallies_and_scores(statepoint: openmc.StatePoint):
             tally_score_info.append(entry)
 
     return tally_score_info
+
 
 def header():
     """This section writes out the page header common to all tabs"""
@@ -122,11 +128,11 @@ def main():
             help="",
         )
 
-        value = st.sidebar.radio(
-            "Tally mean or std dev", options=["mean", "std_dev"]
-        )
+        value = st.sidebar.radio("Tally mean or std dev", options=["mean", "std_dev"])
 
-        axis_units = st.sidebar.selectbox("Axis units", ["km", "m", 'cm', 'mm'], index=2)
+        axis_units = st.sidebar.selectbox(
+            "Axis units", ["km", "m", "cm", "mm"], index=2
+        )
 
         volume_normalization = st.sidebar.radio(
             "Divide value by mesh voxel volume", options=[True, False]
@@ -142,9 +148,9 @@ def main():
 
         mesh = tally.find_filter(filter_type=openmc.MeshFilter).mesh
 
-        if basis == 'RZ':
+        if basis == "RZ":
             max_value = int(tally.shape[1] / 2)  # index 1 is the phi value
-        if basis == 'PhiR':
+        if basis == "PhiR":
             max_value = int(tally.shape[2] / 2)  # index 2 is the z value
 
         if max_value == 0:
@@ -153,8 +159,8 @@ def main():
             slice_index = st.sidebar.slider(
                 label="slice index",
                 min_value=0,
-                value=int(max_value/2),
-                max_value=max_value
+                value=int(max_value / 2),
+                max_value=max_value,
             )
 
         # contour_levels_str = st.sidebar.text_input(
@@ -169,14 +175,12 @@ def main():
         # else:
         #     contour_levels = None
 
-        colorbar = st.sidebar.radio(
-            "Include colorbar", options=[True, False]
-        )
+        colorbar = st.sidebar.radio("Include colorbar", options=[True, False])
 
         title = st.sidebar.text_input(
             "Colorbar title",
             help="Optionally set your own colorbar label for the plot",
-            value='colorbar title',
+            value="colorbar title",
         )
 
         log_lin_scale = st.sidebar.radio("Scale", options=["log", "linear"])
@@ -187,41 +191,41 @@ def main():
 
         if basis == "RZ":
             plot = plot_mesh_tally_rz_slice(
-                tally = tally,
-                slice_index = slice_index,
-                score = score,
-                axes = None,
-                axis_units = axis_units,
-                value = value,
+                tally=tally,
+                slice_index=slice_index,
+                score=score,
+                axes=None,
+                axis_units=axis_units,
+                value=value,
                 # outline: bool = False,
                 # outline_by: str = "cell",
                 # geometry: Optional["openmc.Geometry"] = None,
                 # geometry_basis: str = "xz",
                 # pixels: int = 40000,
-                colorbar = colorbar,
-                volume_normalization = volume_normalization,
-                scaling_factor = scaling_factor,
-                colorbar_kwargs = {'label':title},
+                colorbar=colorbar,
+                volume_normalization=volume_normalization,
+                scaling_factor=scaling_factor,
+                colorbar_kwargs={"label": title},
                 norm=norm
                 # outline_kwargs: dict = _default_outline_kwargs,
                 # **kwargs,
             )
-        elif basis == 'PhiR':
+        elif basis == "PhiR":
             plot = plot_mesh_tally_phir_slice(
-                tally = tally,# "openmc.Tally",
-                slice_index = slice_index,# Optional[int] = None,
-                score = score,# Optional[str] = None,
+                tally=tally,  # "openmc.Tally",
+                slice_index=slice_index,  # Optional[int] = None,
+                score=score,  # Optional[str] = None,
                 # axes,# Optional[str] = None,
-                axis_units = axis_units,# str = "cm",
-                value=value,# str = "mean",
+                axis_units=axis_units,  # str = "cm",
+                value=value,  # str = "mean",
                 # outline,# bool = False,
                 # outline_by,# str = "cell",
                 # geometry,# Optional["openmc.Geometry"] = None,
                 # pixels,# int = 40000,
-                colorbar=colorbar,# bool = True,
-                volume_normalization=volume_normalization,# bool = True,
-                scaling_factor=scaling_factor,# Optional[float] = None,
-                colorbar_kwargs = {'label':title},
+                colorbar=colorbar,  # bool = True,
+                volume_normalization=volume_normalization,  # bool = True,
+                scaling_factor=scaling_factor,  # Optional[float] = None,
+                colorbar_kwargs={"label": title},
                 norm=norm,
                 # outline_kwargs,# d
             )

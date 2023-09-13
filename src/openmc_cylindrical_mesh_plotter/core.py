@@ -141,7 +141,6 @@ def plot_mesh_tally_rz_slice(
     extent = [mesh.r_grid[0], mesh.r_grid[-1], mesh.z_grid[0], mesh.z_grid[-1]]
 
     x_min, x_max, y_min, y_max = [i * axis_scaling_factor for i in extent]
-    
 
     if axes is None:
         fig, axes = plt.subplots()
@@ -177,12 +176,12 @@ def plot_mesh_tally_rz_slice(
         plot = openmc.Plot()
 
         width_x = abs(extent[1] - extent[0])
-        width_y = abs(extent[1] - extent[0]) #same
+        width_y = abs(extent[1] - extent[0])  # same
         width_z = abs(extent[3] - extent[2])
 
-        x_center = abs(extent[0] + (width_x/2))
-        y_center = abs(extent[0] + (width_y/2))
-        z_center = abs(extent[2] + width_z*0.5)
+        x_center = abs(extent[0] + (width_x / 2))
+        y_center = abs(extent[0] + (width_y / 2))
+        z_center = abs(extent[2] + width_z * 0.5)
 
         if geometry_basis == "xz":
             plot.origin = (x_center, 0, z_center)

@@ -33,10 +33,7 @@ my_settings.batches = 10
 my_settings.particles = 100000
 my_settings.source = my_source
 
-mesh = openmc.CylindricalMesh.from_domain(
-    domain=my_geometry,
-    dimension=[20, 20, 20]
-)
+mesh = openmc.CylindricalMesh.from_domain(domain=my_geometry, dimension=[20, 20, 20])
 
 tally = openmc.Tally(name="my_tally")
 mesh_filter = openmc.MeshFilter(mesh)
@@ -55,9 +52,9 @@ plot = plot_mesh_tally_rz_slice(
     tally=my_tally_result,
     outline=True,
     geometry=my_geometry,
-    colorbar_kwargs={'label':'Neutron Flux'},
+    colorbar_kwargs={"label": "Neutron Flux"},
     volume_normalization=False,
-    norm=LogNorm()
+    norm=LogNorm(),
 )
 
 plot.figure.savefig(f"phir_point_source.png")

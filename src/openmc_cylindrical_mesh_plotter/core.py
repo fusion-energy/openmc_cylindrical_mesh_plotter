@@ -134,13 +134,15 @@ def plot_mesh_tally_rz_slice(
         data = data * scaling_factor
 
     data = np.rot90(data, 1)
+    print(data)
 
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
 
     extent = [mesh.r_grid[0], mesh.r_grid[-1], mesh.z_grid[0], mesh.z_grid[-1]]
-
+    print('extent', extent)
     x_min, x_max, y_min, y_max = [i * axis_scaling_factor for i in extent]
+    
 
     if axes is None:
         fig, axes = plt.subplots()
@@ -158,26 +160,53 @@ def plot_mesh_tally_rz_slice(
         # code to make sure geometry outline is in the middle of the mesh voxel
         # two of the three dimensions are just in the center of the mesh
         # but the slice can move one axis off the center so this needs calculating
-        x1, y1, z1 = mesh.upper_right
-        x_origin, y_origin, z_origin = mesh.origin
+        # x1, y1, z1 = mesh.upper_right
+        # x_origin, y_origin, z_origin = mesh.origin
 
-        width_x = abs(x_origin + x1)
-        width_y = abs(y_origin + y1)
-        width_z = abs(z_origin + z1)
+        # # width_x = abs(x_origin + x1)/2
+        # # width_y = abs(y_origin + y1)/2
+        # # width_z = abs(z_origin + z1)
+
+        # width_x, width_y, width_z = mesh.bounding_box.width
+        # width_x=width_x/2
+        # width_y=width_y/2
+        # print('width_x,width_y,width_z')
+        # print(width_x,width_y,width_z)
 
         model = openmc.Model()
         model.geometry = geometry
         plot = openmc.Plot()
 
+        width_x = abs(extent[1] - extent[0])
+        width_y = abs(extent[1] - extent[0]) #same
+        width_z = abs(extent[3] - extent[2])
+
+        x_center = abs(extent[0] + (width_x/2))
+        y_center = abs(extent[0] + (width_y/2))
+        z_center = abs(extent[2] + width_z*0.5)
+
+        # width_x = (x_max-x_min)*100
+        # width_z = (y_max- y_min)*100
+        print(z_center)
+        print(z_center)
+        print(z_center)
+        print(width_z)
+        print(width_z)
+        print(width_z)
+
         if geometry_basis == "xz":
-            plot.origin = (0.5 * width_x, 0.0, 0.5 * width_z)
+            plot.origin = (x_center, 0, z_center)
             plot.width = (width_x, width_z)
             aspect_ratio = width_x / width_z
-        else:  # geometry_basis='xz'
-            plot.origin = (0, 0.5 * width_y, 0.5 * width_z)
+        else:  # geometry_basis='yz'
+            plot.origin = (0, y_center, z_center)
             plot.width = (width_y, width_z)
             aspect_ratio = width_y / width_z
+        
+        # print( width_y , width_z)
 
+        print('pixels',pixels)
+        print('aspect_ratio',aspect_ratio)
         pixels_y = math.sqrt(pixels / aspect_ratio)
         pixels = (int(pixels / pixels_y), int(pixels_y))
         plot.pixels = pixels

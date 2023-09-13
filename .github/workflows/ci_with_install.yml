@@ -20,16 +20,10 @@ jobs:
   testing:
     runs-on: ubuntu-latest
     container:
-      # image: continuumio/miniconda3:4.10.3
       image: openmc/openmc:latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      # - name: install dependencies
-      #   run: |
-      #     conda install -c conda-forge mamba
-      #     mamba install -c conda-forge openmc
 
       - name: install package
         run: |
@@ -48,4 +42,7 @@ jobs:
       - name: Run examples
         run: |
           cd examples
-          python plot_rz_slices.py
+          python plot_phir_slice_point_source.py
+          python plot_phir_slice_ring_source.py
+          python plot_rz_slices_point_source.py
+          python plot_rz_slices_ring_source.py

@@ -3,7 +3,7 @@
 # plotted using the openmc_cylindrical_plotter in the Phi R axis.
 
 import openmc
-from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice
+from openmc_cylindrical_mesh_plotter import plot_mesh_tally_phir_slice
 from matplotlib.colors import LogNorm
 
 
@@ -48,7 +48,7 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-plot = plot_mesh_tally_rz_slice(
+plot = plot_mesh_tally_phir_slice(
     tally=my_tally_result,
     outline=True,
     geometry=my_geometry,

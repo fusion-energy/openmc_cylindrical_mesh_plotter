@@ -10,26 +10,30 @@ from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice
 from matplotlib.colors import LogNorm
 
 mesh = openmc.CylindricalMesh(
-    phi_grid=np.linspace(0.0, 2 * pi, 3),
-    r_grid=np.linspace(0, 10, 50),
-    z_grid=np.linspace(0, 8, 50),
+    phi_grid=np.linspace(0.0, 2 * pi, 4),
+    r_grid=np.linspace(0,100, 50),
+    z_grid=np.linspace(-100, 50, 50),
 )
-tally = openmc.Tally(name="my_tally")
 mesh_filter = openmc.MeshFilter(mesh)
-tally.filters.append(mesh_filter)
-tally.scores.append("flux")
+
+tally = openmc.Tally(name="my_tally")
+tally.filters =[mesh_filter]
+tally.scores=["flux"]
 tallies = openmc.Tallies([tally])
 
-outer_surface = openmc.Sphere(r=100, boundary_type="vacuum")
-cell = openmc.Cell(region=-outer_surface)
+surf1=openmc.model.RectangularParallelepiped(-100,100,-100,100,-100,50, boundary_type="vacuum")
+surf2=openmc.model.RectangularParallelepiped(-95,95,-95,95,-95,45)
+surf3 = openmc.Sphere(r=40)
+cell1 = openmc.Cell(region=-surf3)
+cell2 = openmc.Cell(region=+surf2&-surf1)
+cell3 = openmc.Cell(region=+surf3&-surf2)
 
 material = openmc.Material()
 material.add_nuclide("Fe56", 1)
 material.set_density("g/cm3", 0.1)
 my_materials = openmc.Materials([material])
 
-universe = openmc.Universe(cells=[cell])
-my_geometry = openmc.Geometry(universe)
+my_geometry = openmc.Geometry([cell1, cell2, cell3])
 
 my_source = openmc.Source()
 
@@ -66,6 +70,7 @@ for slice_index in range(1, len(mesh.phi_grid) - 1):
     plot = plot_mesh_tally_rz_slice(
         tally=my_tally_result,
         geometry=my_geometry,
+        outline=True,
         norm=LogNorm(),
         slice_index=slice_index,
     )

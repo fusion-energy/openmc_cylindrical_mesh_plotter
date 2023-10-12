@@ -65,6 +65,6 @@ my_tally_result = statepoint.get_tally(name="my_tally")
 
 for slice_index in range(1, len(mesh.phi_grid)):
     plot = plot_mesh_tally_rz_slice(
-        tally=my_tally_result, geometry=my_geometry, norm=LogNorm()
+        tally=my_tally_result, outline=True, geometry=my_geometry, norm=LogNorm()
     )
     plot.figure.savefig(f"rz_point_source_{slice_index}.png")

@@ -140,7 +140,15 @@ def plot_mesh_tally_rz_slice(
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
 
-    extent = [mesh.r_grid[0], mesh.r_grid[-1], mesh.z_grid[0], mesh.z_grid[-1]]
+    if mesh.origin[0] != 0. or mesh.origin[1] != 0.:
+        raise ValueError('Plotter only works for cylindrical meshes with x,y origins of 0,0')
+
+    extent = [
+        mesh.r_grid[0],
+        mesh.r_grid[-1],
+        mesh.origin[2] + mesh.z_grid[0],
+        mesh.origin[2] + mesh.z_grid[-1]
+    ]
 
     x_min, x_max, y_min, y_max = [i * axis_scaling_factor for i in extent]
 
@@ -157,22 +165,6 @@ def plot_mesh_tally_rz_slice(
     if outline and geometry is not None:
         import matplotlib.image as mpimg
 
-        # code to make sure geometry outline is in the middle of the mesh voxel
-        # two of the three dimensions are just in the center of the mesh
-        # but the slice can move one axis off the center so this needs calculating
-        # x1, y1, z1 = mesh.upper_right
-        # x_origin, y_origin, z_origin = mesh.origin
-
-        # # width_x = abs(x_origin + x1)/2
-        # # width_y = abs(y_origin + y1)/2
-        # # width_z = abs(z_origin + z1)
-
-        # width_x, width_y, width_z = mesh.bounding_box.width
-        # width_x=width_x/2
-        # width_y=width_y/2
-        # print('width_x,width_y,width_z')
-        # print(width_x,width_y,width_z)
-
         model = openmc.Model()
         model.geometry = geometry
         plot = openmc.Plot()
@@ -181,9 +173,9 @@ def plot_mesh_tally_rz_slice(
         width_y = abs(extent[1] - extent[0])  # same
         width_z = abs(extent[3] - extent[2])
 
-        x_center = abs(extent[0] + (width_x / 2))
-        y_center = abs(extent[0] + (width_y / 2))
-        z_center = abs(extent[2] + width_z * 0.5)
+        x_center = extent[0] + (width_x / 2)
+        y_center = extent[0] + (width_y / 2)
+        z_center = extent[2] + width_z * 0.5
 
         if geometry_basis == "xz":
             plot.origin = (x_center, 0, z_center)

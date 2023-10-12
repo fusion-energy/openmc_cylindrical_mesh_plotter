@@ -11,22 +11,24 @@ from matplotlib.colors import LogNorm
 
 mesh = openmc.CylindricalMesh(
     phi_grid=np.linspace(0.0, 2 * pi, 4),
-    r_grid=np.linspace(0,100, 50),
+    r_grid=np.linspace(0, 100, 50),
     z_grid=np.linspace(-100, 50, 50),
 )
 mesh_filter = openmc.MeshFilter(mesh)
 
 tally = openmc.Tally(name="my_tally")
-tally.filters =[mesh_filter]
-tally.scores=["flux"]
+tally.filters = [mesh_filter]
+tally.scores = ["flux"]
 tallies = openmc.Tallies([tally])
 
-surf1=openmc.model.RectangularParallelepiped(-100,100,-100,100,-100,50, boundary_type="vacuum")
-surf2=openmc.model.RectangularParallelepiped(-95,95,-95,95,-95,45)
+surf1 = openmc.model.RectangularParallelepiped(
+    -100, 100, -100, 100, -100, 50, boundary_type="vacuum"
+)
+surf2 = openmc.model.RectangularParallelepiped(-95, 95, -95, 95, -95, 45)
 surf3 = openmc.Sphere(r=40)
 cell1 = openmc.Cell(region=-surf3)
-cell2 = openmc.Cell(region=+surf2&-surf1)
-cell3 = openmc.Cell(region=+surf3&-surf2)
+cell2 = openmc.Cell(region=+surf2 & -surf1)
+cell3 = openmc.Cell(region=+surf3 & -surf2)
 
 material = openmc.Material()
 material.add_nuclide("Fe56", 1)

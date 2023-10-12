@@ -140,14 +140,16 @@ def plot_mesh_tally_rz_slice(
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
 
-    if mesh.origin[0] != 0. or mesh.origin[1] != 0.:
-        raise ValueError('Plotter only works for cylindrical meshes with x,y origins of 0,0')
+    if mesh.origin[0] != 0.0 or mesh.origin[1] != 0.0:
+        raise ValueError(
+            "Plotter only works for cylindrical meshes with x,y origins of 0,0"
+        )
 
     extent = [
         mesh.r_grid[0],
         mesh.r_grid[-1],
         mesh.origin[2] + mesh.z_grid[0],
-        mesh.origin[2] + mesh.z_grid[-1]
+        mesh.origin[2] + mesh.z_grid[-1],
     ]
 
     x_min, x_max, y_min, y_max = [i * axis_scaling_factor for i in extent]

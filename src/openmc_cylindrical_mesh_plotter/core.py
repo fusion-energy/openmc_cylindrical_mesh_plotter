@@ -159,7 +159,11 @@ def plot_mesh_tally_rz_slice(
         axes.set_xlabel(xlabel)
         axes.set_ylabel(ylabel)
 
-    im = axes.imshow(data, extent=(x_min, x_max, y_min, y_max), **kwargs)
+    # zero values with logscale produce noise / fuzzy on the time but setting interpolation to none solves this
+    default_imshow_kwargs = {"interpolation": "none"}
+    default_imshow_kwargs.update(kwargs)
+
+    im = axes.imshow(data, extent=(x_min, x_max, y_min, y_max), **default_imshow_kwargs)
 
     if colorbar:
         fig.colorbar(im, **colorbar_kwargs)

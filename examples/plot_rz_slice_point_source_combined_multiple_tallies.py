@@ -12,7 +12,7 @@ mesh = openmc.CylindricalMesh(
     phi_grid=np.linspace(0.0, 2 * pi, 3),
     r_grid=np.linspace(0, 300, 20),
     z_grid=np.linspace(0, 300, 10),
-    origin=(0,0,0)
+    origin=(0, 0, 0),
 )
 
 neutron_filter = openmc.ParticleFilter("neutron")
@@ -75,7 +75,7 @@ plot = plot_mesh_tally_rz_slice(
     outline=True,
     geometry=my_geometry,
     # norm=LogNorm(),
-    slice_index=1
+    slice_index=1,
 )
 plot.figure.savefig(f"rz_point_source_photon_and_neutron_heating.png")
 
@@ -84,7 +84,7 @@ plot = plot_mesh_tally_rz_slice(
     outline=True,
     geometry=my_geometry,
     # norm=LogNorm(),
-    slice_index=1
+    slice_index=1,
 )
 plot.figure.savefig(f"rz_point_source_neutron_heating.png")
 
@@ -93,6 +93,6 @@ plot = plot_mesh_tally_rz_slice(
     outline=True,
     geometry=my_geometry,
     # norm=LogNorm(),
-    slice_index=1
+    slice_index=1,
 )
 plot.figure.savefig(f"rz_point_source_photon_heating.png")

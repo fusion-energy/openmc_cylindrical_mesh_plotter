@@ -108,9 +108,8 @@ def plot_mesh_tally_rz_slice(
             )
     # if tally is single tally
     else:
-
         mesh = tally.find_filter(filter_type=openmc.MeshFilter).mesh
-    
+
     if not isinstance(mesh, openmc.CylindricalMesh):
         raise NotImplemented(
             f"Only CylindricalMesh are currently supported not {type(mesh)}"
@@ -232,6 +231,7 @@ def plot_mesh_tally_rz_slice(
 
     return axes
 
+
 def _get_tally_data(
     scaling_factor, mesh, tally, value, volume_normalization, score, slice_index
 ):
@@ -243,7 +243,6 @@ def _get_tally_data(
             msg = "score was not specified and there are multiple scores in the tally."
             raise ValueError(msg)
     tally_slice = tally.get_slice(scores=[score])
-
 
     tally_slice = tally.get_slice(scores=[score])
 
@@ -272,6 +271,7 @@ def _get_tally_data(
 
     data = np.rot90(data, 1)
     return data
+
 
 def plot_mesh_tally_phir_slice(
     tally: "openmc.Tally",

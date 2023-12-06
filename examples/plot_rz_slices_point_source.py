@@ -21,32 +21,22 @@ tally.filters.append(mesh_filter)
 tally.scores.append("flux")
 tallies = openmc.Tallies([tally])
 
-outer_surface = openmc.Sphere(r=100, boundary_type="vacuum")
-cell = openmc.Cell(region=-outer_surface)
-
 material = openmc.Material()
 material.add_nuclide("Fe56", 1)
 material.set_density("g/cm3", 0.1)
+
 my_materials = openmc.Materials([material])
+outer_surface = openmc.Sphere(r=100, boundary_type="vacuum")
+cell = openmc.Cell(region=-outer_surface, fill=material)
 
-universe = openmc.Universe(cells=[cell])
-my_geometry = openmc.Geometry(universe)
 
-my_source = openmc.Source()
+my_geometry = openmc.Geometry([cell])
 
-# the distribution of radius is just a single value
-radius = openmc.stats.Discrete([4], [1])
-# the distribution of source z values is just a single value
-z_values = openmc.stats.Discrete([4], [1])
-# the distribution of source azimuthal angles values is a uniform distribution between 0 and 2 Pi
-angle = openmc.stats.Uniform(a=0.0, b=2 * 3.14159265359)
-# this makes the ring source using the three distributions and a radius
-# could do a point source instead with my_source.space = openmc.stats.Point((5,5., 5))
-my_source.space = openmc.stats.CylindricalIndependent(
-    r=radius, phi=angle, z=z_values, origin=(0.0, 0.0, 0.0)
-)
-# sets the direction to isotropic
+
+my_source = openmc.IndependentSource()
+my_source.space = openmc.stats.Point((0, 0, 0))
 my_source.angle = openmc.stats.Isotropic()
+my_source.energy = openmc.stats.Discrete([14e6], [1])
 
 
 my_settings = openmc.Settings()
@@ -65,6 +55,10 @@ my_tally_result = statepoint.get_tally(name="my_tally")
 
 for slice_index in range(1, len(mesh.phi_grid)):
     plot = plot_mesh_tally_rz_slice(
-        tally=my_tally_result, outline=True, geometry=my_geometry, norm=LogNorm()
+        tally=my_tally_result,
+        outline=True,
+        geometry=my_geometry,
+        norm=LogNorm(),
+        slice_index=slice_index
     )
     plot.figure.savefig(f"rz_point_source_{slice_index}.png")

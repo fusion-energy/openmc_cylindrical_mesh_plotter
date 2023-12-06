@@ -184,5 +184,4 @@ def test_phir_slice_of_data_circular_simulation_normalization(
 
 def test_rz_slice_of_data_point_simulation_combined(point_source_simulation):
     tally = point_source_simulation
-    mesh = tally.find_filter(openmc.MeshFilter).mesh
     plot_mesh_tally_rz_slice(tally=[tally, tally])

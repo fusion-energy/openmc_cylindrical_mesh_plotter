@@ -59,6 +59,6 @@ for slice_index in range(1, len(mesh.phi_grid)):
         outline=True,
         geometry=my_geometry,
         norm=LogNorm(),
-        slice_index=slice_index
+        slice_index=slice_index,
     )
     plot.figure.savefig(f"rz_point_source_{slice_index}.png")

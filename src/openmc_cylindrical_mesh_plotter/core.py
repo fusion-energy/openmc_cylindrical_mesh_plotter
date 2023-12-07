@@ -92,7 +92,10 @@ def _get_tally_data(
         slice_index = int(tally_data.shape[dim_index] / 2)  # index 1 is the phi value
 
     if len(tally_data.shape) == 3:
-        data = tally_data[:, slice_index, :]
+        if plot_basis == 'rz':
+            data = tally_data[:, slice_index, :]
+        else: # phir
+            data = tally_data[:, :, slice_index]
     elif len(tally_data.shape) == 2:
         data = tally_data[:, :]
     else:
@@ -100,7 +103,10 @@ def _get_tally_data(
 
     if volume_normalization:
         if len(tally_data.shape) == 3:
-            slice_volumes = mesh.volumes[:, slice_index, :].squeeze()
+            if plot_basis == 'rz':
+                slice_volumes = mesh.volumes[:, slice_index, :].squeeze()
+            else: # phir
+                slice_volumes = mesh.volumes[:, :, slice_index].squeeze()
         elif len(tally_data.shape) == 2:
             slice_volumes = mesh.volumes[:, :].squeeze()
         data = data / slice_volumes
@@ -108,7 +114,8 @@ def _get_tally_data(
     if scaling_factor:
         data = data * scaling_factor
 
-    data = np.rot90(data, 1)
+    if plot_basis == 'rz':
+        data = np.rot90(data, 1)
     return data
 
 
@@ -362,34 +369,8 @@ def plot_mesh_tally_phir_slice(
     """
     geometry_basis: str = "xy"  # TODO add geometry outline plot to phiR plotting
 
-    
-
     mesh, score = _check_inputs('phir', score, geometry_basis, axis_units, volume_normalization, outline, tally)
 
-    tally_slice = tally.get_slice(scores=[score])
-
-    tally_data = tally_slice.get_reshaped_data(expand_dims=True, value=value).squeeze()
-
-    # get the middle phi value
-    if slice_index is None:
-        slice_index = int(tally_data.shape[2] / 2)  # index 1 is the phi value
-
-    if len(tally_data.shape) == 3:
-        data = tally_data[:, :, slice_index]
-    elif len(tally_data.shape) == 2:
-        data = tally_data[:, :]
-    else:
-        raise NotImplementedError("Mesh is not 3d or 2d, can't plot")
-
-    if volume_normalization:
-        if len(tally_data.shape) == 3:
-            slice_volumes = mesh.volumes[:, :, slice_index].squeeze()
-        elif len(tally_data.shape) == 2:
-            slice_volumes = mesh.volumes[:, :].squeeze()
-        data = data / slice_volumes
-
-    if scaling_factor:
-        data = data * scaling_factor
 
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
@@ -405,6 +386,33 @@ def plot_mesh_tally_phir_slice(
 
     theta = np.linspace(mesh.phi_grid[0], mesh.phi_grid[-1], len(mesh.phi_grid) - 1)
     r = np.linspace(mesh.r_grid[0], mesh.r_grid[-1], len(mesh.r_grid) - 1)
+
+    if isinstance(tally, typing.Sequence):
+        for counter, one_tally in enumerate(tally):
+            new_data = _get_tally_data(
+                'phir',
+                scaling_factor,
+                mesh,
+                one_tally,
+                value,
+                volume_normalization,
+                score,
+                slice_index,
+            )
+            if counter == 0:
+                data = np.zeros(shape=new_data.shape)
+            data = data + new_data
+    else:  # single tally
+        data = _get_tally_data(
+            'phir',
+            scaling_factor,
+            mesh,
+            tally,
+            value,
+            volume_normalization,
+            score,
+            slice_index,
+        )
 
     im = axes.contourf(theta[:], r[:], data, extent=(0, 100, 0, 50), **kwargs)
 

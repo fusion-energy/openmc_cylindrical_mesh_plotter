@@ -5,13 +5,13 @@
 import openmc
 import numpy as np
 from math import pi
-import matplotlib.pyplot as plt
-from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice
+from matplotlib.colors import LogNorm
+from openmc_cylindrical_mesh_plotter import plot_mesh_tally_phir_slice
 
 mesh = openmc.CylindricalMesh(
-    phi_grid=np.linspace(0.0, 2 * pi, 3),
+    phi_grid=np.linspace(0.0, 2 * pi, 20),
     r_grid=np.linspace(0, 300, 20),
-    z_grid=np.linspace(0, 300, 10),
+    z_grid=np.linspace(0, 300, 2),
     origin=(0, 0, 0),
 )
 
@@ -48,10 +48,10 @@ source_n.strength = 1
 source_n.particle = "neutron"
 
 source_p = openmc.IndependentSource()
-source_p.space = openmc.stats.Point((0, 0, 200))
+source_p.space = openmc.stats.Point((0, 200, 0))
 source_p.angle = openmc.stats.Isotropic()
 source_p.energy = openmc.stats.Discrete([10e6], [1])
-source_p.strength = 1
+source_p.strength = 10
 source_p.particle = "photon"
 
 
@@ -70,41 +70,41 @@ statepoint = openmc.StatePoint(sp_filename)
 my_tally1_result = statepoint.get_tally(name="my_neutron_heating_tally")
 my_tally2_result = statepoint.get_tally(name="my_photon_heating_tally")
 
-plot = plot_mesh_tally_rz_slice(
+plot = plot_mesh_tally_phir_slice(
     tally=[my_tally1_result, my_tally2_result],
     outline=True,
     geometry=my_geometry,
-    # norm=LogNorm(),
+    norm=LogNorm(),
     slice_index=1,
     colorbar_kwargs={
         "label": 'Neutron and photon heating',
     },
 )
-plot.figure.savefig(f"rz_point_source_photon_and_neutron_heating.png")
-print("written rz_point_source_photon_and_neutron_heating.png")
+plot.figure.savefig(f"phir_point_source_photon_and_neutron_heating.png")
+print("written phir_point_source_photon_and_neutron_heating.png")
 
-plot = plot_mesh_tally_rz_slice(
+plot = plot_mesh_tally_phir_slice(
     tally=[my_tally1_result],
     outline=True,
     geometry=my_geometry,
-    # norm=LogNorm(),
+    norm=LogNorm(),
     slice_index=1,
     colorbar_kwargs={
         "label": 'Neutron heating',
     },
 )
-plot.figure.savefig(f"rz_point_source_neutron_heating.png")
-print("written rz_point_source_neutron_heating.png")
+plot.figure.savefig(f"phir_point_source_neutron_heating.png")
+print("written phir_point_source_neutron_heating.png")
 
-plot = plot_mesh_tally_rz_slice(
+plot = plot_mesh_tally_phir_slice(
     tally=[my_tally2_result],
     outline=True,
     geometry=my_geometry,
-    # norm=LogNorm(),
+    norm=LogNorm(),
     slice_index=1,
     colorbar_kwargs={
         "label": 'Photon heating',
     },
 )
-plot.figure.savefig(f"rz_point_source_photon_heating.png")
-print("written rz_point_source_photon_heating.png")
+plot.figure.savefig(f"phir_point_source_photon_heating.png")
+print("written phir_point_source_photon_heating.png")

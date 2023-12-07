@@ -78,7 +78,7 @@ plot = plot_mesh_tally_rz_slice(
     slice_index=1,
 )
 plot.figure.savefig(f"rz_point_source_photon_and_neutron_heating.png")
-print('written rz_point_source_photon_and_neutron_heating.png')
+print("written rz_point_source_photon_and_neutron_heating.png")
 
 plot = plot_mesh_tally_rz_slice(
     tally=[my_tally1_result],
@@ -88,7 +88,7 @@ plot = plot_mesh_tally_rz_slice(
     slice_index=1,
 )
 plot.figure.savefig(f"rz_point_source_neutron_heating.png")
-print('written rz_point_source_neutron_heating.png')
+print("written rz_point_source_neutron_heating.png")
 
 plot = plot_mesh_tally_rz_slice(
     tally=[my_tally2_result],
@@ -98,4 +98,4 @@ plot = plot_mesh_tally_rz_slice(
     slice_index=1,
 )
 plot.figure.savefig(f"rz_point_source_photon_heating.png")
-print('written rz_point_source_photon_heating.png')
+print("written rz_point_source_photon_heating.png")

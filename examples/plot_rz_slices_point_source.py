@@ -53,7 +53,7 @@ statepoint = openmc.StatePoint(sp_filename)
 
 my_tally_result = statepoint.get_tally(name="my_tally")
 
-for slice_index in range(0, len(mesh.phi_grid)-1):
+for slice_index in range(0, len(mesh.phi_grid) - 1):
     plot = plot_mesh_tally_rz_slice(
         tally=my_tally_result,
         outline=True,
@@ -62,4 +62,4 @@ for slice_index in range(0, len(mesh.phi_grid)-1):
         slice_index=slice_index,
     )
     plot.figure.savefig(f"rz_point_source_{slice_index}.png")
-    print(f'written rz_point_source_{slice_index}.png')
+    print(f"written rz_point_source_{slice_index}.png")

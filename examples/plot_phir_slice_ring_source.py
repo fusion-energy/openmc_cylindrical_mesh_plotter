@@ -67,4 +67,4 @@ my_tally_result = statepoint.get_tally(name="my_tally")
 
 plot = plot_mesh_tally_phir_slice(tally=my_tally_result)
 plot.figure.savefig(f"phir_ring_source.png")
-print('written phir_ring_source.png')
+print("written phir_ring_source.png")

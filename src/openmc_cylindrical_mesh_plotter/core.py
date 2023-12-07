@@ -24,9 +24,11 @@ _default_outline_kwargs = {"colors": "black", "linestyles": "solid", "linewidths
 # zero values with logscale produce noise / fuzzy on the time but setting interpolation to none solves this
 default_imshow_kwargs = {"interpolation": "none"}
 
-def _check_inputs(plot_basis, score, geometry_basis, axis_units, volume_normalization, outline, tally):
 
-    if plot_basis=='rz':
+def _check_inputs(
+    plot_basis, score, geometry_basis, axis_units, volume_normalization, outline, tally
+):
+    if plot_basis == "rz":
         cv.check_value("geometry_basis", geometry_basis, ["xz", "yz"])
     else:  # must be 'phir'
         cv.check_value("geometry_basis", geometry_basis, ["xy"])
@@ -47,7 +49,7 @@ def _check_inputs(plot_basis, score, geometry_basis, axis_units, volume_normaliz
             )
         # tally is sequence but all meshes are the same
         mesh = one_tally.find_filter(filter_type=openmc.MeshFilter).mesh
-        
+
     else:
         # tally is single tally
         mesh = tally.find_filter(filter_type=openmc.MeshFilter).mesh
@@ -74,14 +76,20 @@ def _check_inputs(plot_basis, score, geometry_basis, axis_units, volume_normaliz
                 score = tally.scores[0]
             else:
                 raise ValueError(msg)
-    
+
     return mesh, score
 
 
 def _get_tally_data(
-    plot_basis, scaling_factor, mesh, tally, value, volume_normalization, score, slice_index
+    plot_basis,
+    scaling_factor,
+    mesh,
+    tally,
+    value,
+    volume_normalization,
+    score,
+    slice_index,
 ):
-
     tally_slice = tally.get_slice(scores=[score])
 
     tally_slice = tally.get_slice(scores=[score])
@@ -89,14 +97,14 @@ def _get_tally_data(
     tally_data = tally_slice.get_reshaped_data(expand_dims=True, value=value).squeeze()
 
     if slice_index is None:
-        dim_index = {'rz': 1, 'phir': 2}[plot_basis]
+        dim_index = {"rz": 1, "phir": 2}[plot_basis]
         # get the middle phi or z value
         slice_index = int(tally_data.shape[dim_index] / 2)  # index 1 is the phi value
 
     if len(tally_data.shape) == 3:
-        if plot_basis == 'rz':
+        if plot_basis == "rz":
             data = tally_data[:, slice_index, :]
-        else: # phir
+        else:  # phir
             data = tally_data[:, :, slice_index]
     elif len(tally_data.shape) == 2:
         data = tally_data[:, :]
@@ -105,9 +113,9 @@ def _get_tally_data(
 
     if volume_normalization:
         if len(tally_data.shape) == 3:
-            if plot_basis == 'rz':
+            if plot_basis == "rz":
                 slice_volumes = mesh.volumes[:, slice_index, :].squeeze()
-            else: # phir
+            else:  # phir
                 slice_volumes = mesh.volumes[:, :, slice_index].squeeze()
         elif len(tally_data.shape) == 2:
             slice_volumes = mesh.volumes[:, :].squeeze()
@@ -116,7 +124,7 @@ def _get_tally_data(
     if scaling_factor:
         data = data * scaling_factor
 
-    if plot_basis == 'rz':
+    if plot_basis == "rz":
         data = np.rot90(data, 1)
     return data
 
@@ -189,7 +197,9 @@ def plot_mesh_tally_rz_slice(
         Resulting image
     """
 
-    mesh, score = _check_inputs('rz', score, geometry_basis, axis_units, volume_normalization, outline, tally)
+    mesh, score = _check_inputs(
+        "rz", score, geometry_basis, axis_units, volume_normalization, outline, tally
+    )
 
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
@@ -218,7 +228,7 @@ def plot_mesh_tally_rz_slice(
     if isinstance(tally, typing.Sequence):
         for counter, one_tally in enumerate(tally):
             new_data = _get_tally_data(
-                'rz',
+                "rz",
                 scaling_factor,
                 mesh,
                 one_tally,
@@ -232,7 +242,7 @@ def plot_mesh_tally_rz_slice(
             data = data + new_data
     else:  # single tally
         data = _get_tally_data(
-            'rz',
+            "rz",
             scaling_factor,
             mesh,
             tally,
@@ -304,7 +314,6 @@ def plot_mesh_tally_rz_slice(
     return axes
 
 
-
 def plot_mesh_tally_phir_slice(
     tally: "openmc.Tally",
     slice_index: typing.Optional[int] = None,
@@ -369,8 +378,9 @@ def plot_mesh_tally_phir_slice(
     """
     geometry_basis: str = "xy"  # TODO add geometry outline plot to phiR plotting
 
-    mesh, score = _check_inputs('phir', score, geometry_basis, axis_units, volume_normalization, outline, tally)
-
+    mesh, score = _check_inputs(
+        "phir", score, geometry_basis, axis_units, volume_normalization, outline, tally
+    )
 
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
@@ -392,7 +402,7 @@ def plot_mesh_tally_phir_slice(
     if isinstance(tally, typing.Sequence):
         for counter, one_tally in enumerate(tally):
             new_data = _get_tally_data(
-                'phir',
+                "phir",
                 scaling_factor,
                 mesh,
                 one_tally,
@@ -406,7 +416,7 @@ def plot_mesh_tally_phir_slice(
             data = data + new_data
     else:  # single tally
         data = _get_tally_data(
-            'phir',
+            "phir",
             scaling_factor,
             mesh,
             tally,

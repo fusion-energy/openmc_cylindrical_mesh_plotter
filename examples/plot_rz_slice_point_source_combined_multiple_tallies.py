@@ -82,7 +82,7 @@ plot = plot_mesh_tally_rz_slice(
     # norm=LogNorm(),
     slice_index=1,
     colorbar_kwargs={
-        "label": 'Neutron and photon heating',
+        "label": "Neutron and photon heating",
     },
 )
 plot.figure.savefig(f"rz_point_source_photon_and_neutron_heating.png")
@@ -95,7 +95,7 @@ plot = plot_mesh_tally_rz_slice(
     # norm=LogNorm(),
     slice_index=1,
     colorbar_kwargs={
-        "label": 'Neutron heating',
+        "label": "Neutron heating",
     },
 )
 plot.figure.savefig(f"rz_point_source_neutron_heating.png")
@@ -108,7 +108,7 @@ plot = plot_mesh_tally_rz_slice(
     # norm=LogNorm(),
     slice_index=1,
     colorbar_kwargs={
-        "label": 'Photon heating',
+        "label": "Photon heating",
     },
 )
 plot.figure.savefig(f"rz_point_source_photon_heating.png")

@@ -21,6 +21,8 @@ else:
 
 _default_outline_kwargs = {"colors": "black", "linestyles": "solid", "linewidths": 1}
 
+# zero values with logscale produce noise / fuzzy on the time but setting interpolation to none solves this
+default_imshow_kwargs = {"interpolation": "none"}
 
 def _check_inputs(plot_basis, score, geometry_basis, axis_units, volume_normalization, outline, tally):
 
@@ -211,8 +213,6 @@ def plot_mesh_tally_rz_slice(
         axes.set_xlabel(xlabel)
         axes.set_ylabel(ylabel)
 
-    # zero values with logscale produce noise / fuzzy on the time but setting interpolation to none solves this
-    default_imshow_kwargs = {"interpolation": "none"}
     default_imshow_kwargs.update(kwargs)
 
     if isinstance(tally, typing.Sequence):
@@ -387,6 +387,8 @@ def plot_mesh_tally_phir_slice(
     theta = np.linspace(mesh.phi_grid[0], mesh.phi_grid[-1], len(mesh.phi_grid) - 1)
     r = np.linspace(mesh.r_grid[0], mesh.r_grid[-1], len(mesh.r_grid) - 1)
 
+    # default_imshow_kwargs.update(kwargs)
+
     if isinstance(tally, typing.Sequence):
         for counter, one_tally in enumerate(tally):
             new_data = _get_tally_data(
@@ -418,6 +420,9 @@ def plot_mesh_tally_phir_slice(
 
     if colorbar:
         fig.colorbar(im, **colorbar_kwargs)
+
+    # todo see if moving from a contourf to imshow can work
+    # https://stackoverflow.com/questions/54209640/imshow-in-polar-coordinates
 
     # if outline and geometry is not None:
     #     import matplotlib.image as mpimg

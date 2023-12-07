@@ -1,6 +1,10 @@
 # this example creates a simple CylindricalMesh tally and performs an openmc
 # simulation to populate the tally. Slices of the resulting tally is then
-# plotted using the openmc_cylindrical_plotter
+# plotted using the openmc_cylindrical_plotter. In this example both heating
+# tallies are combined. This is just a simple tally to show the feature.
+# The natural use case is combining neutron and photon dose tallies which must
+# be done as separate tallies due to the different energy function filters but
+# we often want to combine the neutron and photon dose to get total dose
 
 import openmc
 import numpy as np

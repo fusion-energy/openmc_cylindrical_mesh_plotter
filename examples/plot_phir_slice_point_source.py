@@ -22,8 +22,8 @@ cell_outer = openmc.Cell(region=-outer_surface & +inner_surface, fill=material)
 my_geometry = openmc.Geometry([cell_inner, cell_outer])
 
 my_source = openmc.IndependentSource()
-# this makes a point source instead with the geometry
-my_source.space = openmc.stats.Point(my_geometry.bounding_box.center)
+# this makes a point source inside the geometry
+my_source.space = openmc.stats.Point((50, 50, 50))
 
 
 my_settings = openmc.Settings()
@@ -58,3 +58,4 @@ plot = plot_mesh_tally_phir_slice(
 )
 
 plot.figure.savefig(f"phir_point_source.png")
+print("written phir_point_source.png")

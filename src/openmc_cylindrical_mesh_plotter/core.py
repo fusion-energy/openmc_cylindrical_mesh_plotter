@@ -22,6 +22,96 @@ else:
 _default_outline_kwargs = {"colors": "black", "linestyles": "solid", "linewidths": 1}
 
 
+def _check_inputs(plot_basis, score, geometry_basis, axis_units, volume_normalization, outline, tally):
+
+    if plot_basis=='rz':
+        cv.check_value("geometry_basis", geometry_basis, ["xz", "yz"])
+    else:  # must be 'phir'
+        cv.check_value("geometry_basis", geometry_basis, ["xy"])
+    cv.check_value("axis_units", axis_units, ["km", "m", "cm", "mm"])
+    cv.check_type("volume_normalization", volume_normalization, bool)
+    cv.check_type("outline", outline, bool)
+
+    # if tally is multiple tallies
+    if isinstance(tally, typing.Sequence):
+        mesh_ids = []
+        for one_tally in tally:
+            mesh = one_tally.find_filter(filter_type=openmc.MeshFilter).mesh
+            # TODO check the tallies use the same mesh
+            mesh_ids.append(mesh.id)
+        if not all(i == mesh_ids[0] for i in mesh_ids):
+            raise ValueError(
+                f"mesh ids {mesh_ids} are different, please use same mesh when combining tallies"
+            )
+        # tally is sequence but all meshes are the same
+        mesh = one_tally.find_filter(filter_type=openmc.MeshFilter).mesh
+        
+    else:
+        # tally is single tally
+        mesh = tally.find_filter(filter_type=openmc.MeshFilter).mesh
+
+    if not isinstance(mesh, openmc.CylindricalMesh):
+        raise NotImplemented(
+            f"Only CylindricalMesh are currently supported not {type(mesh)}"
+        )
+
+    if mesh.n_dimension != 3:
+        msg = "Your mesh has {mesh.n_dimension} dimension and currently only CylindricalMesh with 3 dimensions are supported"
+        raise NotImplementedError(msg)
+
+    # if score is not specified and tally has a single score then we know which score to use
+    if score is None:
+        msg = "score was not specified and there are multiple scores in the tally."
+        if isinstance(tally, typing.Sequence):
+            for one_tally in tally:
+                if len(one_tally.scores) != 1:
+                    raise ValueError(msg)
+            score = one_tally.scores[0]
+        else:
+            if len(tally.scores) == 1:
+                score = tally.scores[0]
+            else:
+                raise ValueError(msg)
+    
+    return mesh, score
+
+
+def _get_tally_data(
+    plot_basis, scaling_factor, mesh, tally, value, volume_normalization, score, slice_index
+):
+
+    tally_slice = tally.get_slice(scores=[score])
+
+    tally_slice = tally.get_slice(scores=[score])
+
+    tally_data = tally_slice.get_reshaped_data(expand_dims=True, value=value).squeeze()
+
+    if slice_index is None:
+        dim_index = {'rz': 1, 'phir': 2}[plot_basis]
+        # get the middle phi or z value
+        slice_index = int(tally_data.shape[dim_index] / 2)  # index 1 is the phi value
+
+    if len(tally_data.shape) == 3:
+        data = tally_data[:, slice_index, :]
+    elif len(tally_data.shape) == 2:
+        data = tally_data[:, :]
+    else:
+        raise NotImplementedError("Mesh is not 3d or 2d, can't plot")
+
+    if volume_normalization:
+        if len(tally_data.shape) == 3:
+            slice_volumes = mesh.volumes[:, slice_index, :].squeeze()
+        elif len(tally_data.shape) == 2:
+            slice_volumes = mesh.volumes[:, :].squeeze()
+        data = data / slice_volumes
+
+    if scaling_factor:
+        data = data * scaling_factor
+
+    data = np.rot90(data, 1)
+    return data
+
+
 def plot_mesh_tally_rz_slice(
     tally: typing.Union["openmc.Tally", typing.Sequence["openmc.Tally"]],
     slice_index: typing.Optional[int] = None,
@@ -90,34 +180,7 @@ def plot_mesh_tally_rz_slice(
         Resulting image
     """
 
-    cv.check_value("geometry_basis", geometry_basis, ["xz", "yz"])
-    cv.check_value("axis_units", axis_units, ["km", "m", "cm", "mm"])
-    cv.check_type("volume_normalization", volume_normalization, bool)
-    cv.check_type("outline", outline, bool)
-
-    # if tally is multiple tallies
-    if isinstance(tally, typing.Sequence):
-        mesh_ids = []
-        for one_tally in tally:
-            mesh = one_tally.find_filter(filter_type=openmc.MeshFilter).mesh
-            # TODO check the tallies use the same mesh
-            mesh_ids.append(mesh.id)
-        if not all(i == mesh_ids[0] for i in mesh_ids):
-            raise ValueError(
-                f"mesh ids {mesh_ids} are different, please use same mesh when combining tallies"
-            )
-    # if tally is single tally
-    else:
-        mesh = tally.find_filter(filter_type=openmc.MeshFilter).mesh
-
-    if not isinstance(mesh, openmc.CylindricalMesh):
-        raise NotImplemented(
-            f"Only CylindricalMesh are currently supported not {type(mesh)}"
-        )
-
-    if mesh.n_dimension != 3:
-        msg = "Your mesh has {mesh.n_dimension} dimension and currently only CylindricalMesh with 3 dimensions are supported"
-        raise NotImplementedError(msg)
+    mesh, score = _check_inputs('rz', score, geometry_basis, axis_units, volume_normalization, outline, tally)
 
     xlabel, ylabel = f"r [{axis_units}]", f"z [{axis_units}]"
     axis_scaling_factor = {"km": 0.00001, "m": 0.01, "cm": 1, "mm": 10}[axis_units]
@@ -148,6 +211,7 @@ def plot_mesh_tally_rz_slice(
     if isinstance(tally, typing.Sequence):
         for counter, one_tally in enumerate(tally):
             new_data = _get_tally_data(
+                'rz',
                 scaling_factor,
                 mesh,
                 one_tally,
@@ -161,6 +225,7 @@ def plot_mesh_tally_rz_slice(
             data = data + new_data
     else:  # single tally
         data = _get_tally_data(
+            'rz',
             scaling_factor,
             mesh,
             tally,
@@ -232,46 +297,6 @@ def plot_mesh_tally_rz_slice(
     return axes
 
 
-def _get_tally_data(
-    scaling_factor, mesh, tally, value, volume_normalization, score, slice_index
-):
-    # if score is not specified and tally has a single score then we know which score to use
-    if score is None:
-        if len(tally.scores) == 1:
-            score = tally.scores[0]
-        else:
-            msg = "score was not specified and there are multiple scores in the tally."
-            raise ValueError(msg)
-    tally_slice = tally.get_slice(scores=[score])
-
-    tally_slice = tally.get_slice(scores=[score])
-
-    tally_data = tally_slice.get_reshaped_data(expand_dims=True, value=value).squeeze()
-
-    # get the middle phi value
-    if slice_index is None:
-        slice_index = int(tally_data.shape[1] / 2)  # index 1 is the phi value
-
-    if len(tally_data.shape) == 3:
-        data = tally_data[:, slice_index, :]
-    elif len(tally_data.shape) == 2:
-        data = tally_data[:, :]
-    else:
-        raise NotImplementedError("Mesh is not 3d or 2d, can't plot")
-
-    if volume_normalization:
-        if len(tally_data.shape) == 3:
-            slice_volumes = mesh.volumes[:, slice_index, :].squeeze()
-        elif len(tally_data.shape) == 2:
-            slice_volumes = mesh.volumes[:, :].squeeze()
-        data = data / slice_volumes
-
-    if scaling_factor:
-        data = data * scaling_factor
-
-    data = np.rot90(data, 1)
-    return data
-
 
 def plot_mesh_tally_phir_slice(
     tally: "openmc.Tally",
@@ -335,28 +360,11 @@ def plot_mesh_tally_phir_slice(
     matplotlib.image.AxesImage
         Resulting image
     """
-    geometry_basis: str = "xy"
+    geometry_basis: str = "xy"  # TODO add geometry outline plot to phiR plotting
 
-    cv.check_value("axis_units", axis_units, ["km", "m", "cm", "mm"])
-    cv.check_type("volume_normalization", volume_normalization, bool)
-    cv.check_type("outline", outline, bool)
+    
 
-    mesh = tally.find_filter(filter_type=openmc.MeshFilter).mesh
-    if not isinstance(mesh, openmc.CylindricalMesh):
-        raise NotImplemented(
-            f"Only CylindricalMesh are currently supported not {type(mesh)}"
-        )
-    if mesh.n_dimension != 3:
-        msg = "Your mesh has {mesh.n_dimension} dimension and currently only CylindricalMesh with 3 dimensions are supported"
-        raise NotImplementedError(msg)
-
-    # if score is not specified and tally has a single score then we know which score to use
-    if score is None:
-        if len(tally.scores) == 1:
-            score = tally.scores[0]
-        else:
-            msg = "score was not specified and there are multiple scores in the tally."
-            raise ValueError(msg)
+    mesh, score = _check_inputs('phir', score, geometry_basis, axis_units, volume_normalization, outline, tally)
 
     tally_slice = tally.get_slice(scores=[score])
 

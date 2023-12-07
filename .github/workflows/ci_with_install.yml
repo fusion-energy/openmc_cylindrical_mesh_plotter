@@ -44,5 +44,6 @@ jobs:
           cd examples
           python plot_phir_slice_point_source.py
           python plot_phir_slice_ring_source.py
+          python plot_rz_slice_point_source_combined_multiple_tallies.py
           python plot_rz_slices_point_source.py
           python plot_rz_slices_ring_source.py

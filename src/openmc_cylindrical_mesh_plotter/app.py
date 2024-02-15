@@ -206,7 +206,7 @@ def main():
                 volume_normalization=volume_normalization,
                 scaling_factor=scaling_factor,
                 colorbar_kwargs={"label": title},
-                norm=norm
+                norm=norm,
                 # outline_kwargs: dict = _default_outline_kwargs,
                 # **kwargs,
             )

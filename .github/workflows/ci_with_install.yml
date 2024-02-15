@@ -52,5 +52,4 @@ jobs:
       - name: install packages with GUI
         run: |
           pip install .[gui]
-          openmc_cylindrical_mesh_plotter
   

@@ -75,5 +75,16 @@ for slice_index in range(1, len(mesh.phi_grid) - 1):
         outline=True,
         norm=LogNorm(),
         slice_index=slice_index,
+        reflect_in_z=True
+    )
+    plot.figure.savefig(f"rz_ring_source_reflected_{slice_index}.png")
+
+    plot = plot_mesh_tally_rz_slice(
+        tally=my_tally_result,
+        geometry=my_geometry,
+        outline=True,
+        norm=LogNorm(),
+        slice_index=slice_index,
     )
     plot.figure.savefig(f"rz_ring_source_{slice_index}.png")
+

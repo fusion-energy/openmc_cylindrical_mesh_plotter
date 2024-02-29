@@ -185,3 +185,14 @@ def test_phir_slice_of_data_circular_simulation_normalization(
 def test_rz_slice_of_data_point_simulation_combined(point_source_simulation):
     tally = point_source_simulation
     plot_mesh_tally_rz_slice(tally=[tally, tally])
+
+
+def test_rz_slice_of_data_point_simulation_flipping(point_source_simulation):
+    tally = point_source_simulation
+    plot = plot_mesh_tally_rz_slice(tally=tally)
+    width_plot = plot.get_xlim()[1] - plot.get_xlim()[0]
+
+    plot_flipped = plot_mesh_tally_rz_slice(tally=tally, mirror=True)
+    width_plot_flipped = plot_flipped.get_xlim()[1] - plot_flipped.get_xlim()[0]
+
+    assert width_plot * 2 == width_plot_flipped

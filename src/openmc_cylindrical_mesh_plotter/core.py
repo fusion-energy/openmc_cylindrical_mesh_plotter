@@ -254,7 +254,7 @@ def plot_mesh_tally_rz_slice(
             score,
             slice_index,
         )
-    
+
     if mirror:
         data_reflected = np.fliplr(data)
         data = np.concatenate((data_reflected, data), axis=1)
@@ -309,7 +309,7 @@ def plot_mesh_tally_rz_slice(
         # Combine R, G, B values into a single int
         rgb = (img * 256).astype(int)
         image_value = (rgb[..., 0] << 16) + (rgb[..., 1] << 8) + (rgb[..., 2])
-        
+
         if mirror:
             image_value_reflected = np.fliplr(image_value)
             image_value = np.concatenate((image_value_reflected, image_value), axis=1)

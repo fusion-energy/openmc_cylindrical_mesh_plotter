@@ -75,7 +75,7 @@ for slice_index in range(1, len(mesh.phi_grid) - 1):
         outline=True,
         norm=LogNorm(),
         slice_index=slice_index,
-        mirror=True
+        mirror=True,
     )
     plot.figure.savefig(f"rz_ring_source_reflected_{slice_index}.png")
 
@@ -87,4 +87,3 @@ for slice_index in range(1, len(mesh.phi_grid) - 1):
         slice_index=slice_index,
     )
     plot.figure.savefig(f"rz_ring_source_{slice_index}.png")
-

@@ -143,7 +143,7 @@ def plot_mesh_tally_rz_slice(
     pixels: int = 40000,
     colorbar: bool = True,
     volume_normalization: bool = True,
-    reflect_in_z: bool = False,
+    mirror: bool = False,
     scaling_factor: typing.Optional[float] = None,
     colorbar_kwargs: dict = {},
     outline_kwargs: dict = _default_outline_kwargs,
@@ -184,7 +184,7 @@ def plot_mesh_tally_rz_slice(
         Whether or not to add a colorbar to the plot.
     volume_normalization : bool, optional
         Whether or not to normalize the data by the volume of the mesh elements.
-    reflect_in_z : bool, optional
+    mirror : bool, optional
         Whether to reflect the plot in the z axis to include negative r values.
     scaling_factor : float
         A optional multiplier to apply to the tally data prior to ploting.
@@ -255,7 +255,7 @@ def plot_mesh_tally_rz_slice(
             slice_index,
         )
     
-    if reflect_in_z:
+    if mirror:
         data_reflected = np.fliplr(data)
         data = np.concatenate((data_reflected, data), axis=1)
         x_min = x_max * -1
@@ -310,7 +310,7 @@ def plot_mesh_tally_rz_slice(
         rgb = (img * 256).astype(int)
         image_value = (rgb[..., 0] << 16) + (rgb[..., 1] << 8) + (rgb[..., 2])
         
-        if reflect_in_z:
+        if mirror:
             image_value_reflected = np.fliplr(image_value)
             image_value = np.concatenate((image_value_reflected, image_value), axis=1)
 

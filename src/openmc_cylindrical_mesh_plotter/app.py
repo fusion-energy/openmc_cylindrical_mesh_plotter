@@ -1,5 +1,6 @@
 import streamlit as st
 from matplotlib.colors import LogNorm
+from matplotlib import colormaps
 from openmc_cylindrical_mesh_plotter import (
     plot_mesh_tally_rz_slice,
     plot_mesh_tally_phir_slice,
@@ -192,6 +193,14 @@ def main():
         else:
             title = None
 
+        cmap = st.sidebar.selectbox(
+            label="Color map",
+            options=list(colormaps),
+            index=3,
+            key="cmap",
+            help="The MatPlotLib color map used for the plot.",
+        )
+
         if basis == "RZ":
             mirror = st.sidebar.radio("Mirror", options=[True, False], index=1)
             outline = st.sidebar.radio("Geometry outline", options=[True, False])
@@ -239,6 +248,7 @@ def main():
                 colorbar_kwargs={"label": title},
                 norm=norm,
                 mirror=mirror,
+                cmap=cmap,
                 # outline_kwargs: dict = _default_outline_kwargs,
                 # **kwargs,
             )

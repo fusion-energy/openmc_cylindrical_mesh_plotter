@@ -202,6 +202,7 @@ def main():
         )
 
         if basis == "RZ":
+            mirror = st.sidebar.radio("Mirror", options=[True, False], index=1)
             outline = st.sidebar.radio("Geometry outline", options=[True, False])
             if outline:
                 geometry_basis = st.sidebar.selectbox(
@@ -246,6 +247,7 @@ def main():
                 scaling_factor=scaling_factor,
                 colorbar_kwargs={"label": title},
                 norm=norm,
+                mirror=mirror,
                 cmap=cmap,
                 # outline_kwargs: dict = _default_outline_kwargs,
                 # **kwargs,

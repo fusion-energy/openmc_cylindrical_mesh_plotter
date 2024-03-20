@@ -23,7 +23,6 @@ def get_tallies_with_cylindrical_mesh_filters(statepoint: openmc.StatePoint):
             mf = tally.find_filter(filter_type=openmc.MeshFilter)
             if isinstance(mf.mesh, openmc.CylindricalMesh):
                 matching_tally_ids.append(tally.id)
-                print("found regmeshfilter")
         except ValueError:
             mf = None
 
@@ -78,8 +77,6 @@ def header():
 
             💾 Raise a feature request, report and issue or make a contribution on [GitHub](https://github.com/fusion-energy/openmc_cylindrical_mesh_plotter)
 
-            📧 Email feedback to mail@jshimwell.com
-
             🔗 This package forms part of a more [comprehensive openmc plot](https://github.com/fusion-energy/openmc_plot) package where geometry, tallies, slices, etc can be plotted and is hosted on [xsplot.com](https://www.xsplot.com/) .
         """
     )
@@ -94,8 +91,7 @@ def main():
 
         """
         # Not got a h5 file handy, right mouse 🖱️ click and save these links
-        # [ example 1 ](https://fusion-energy.github.io/openmc_cylindrical_mesh_plotter/examples/csg_tokamak/geometry.xml),
-        # [ example 2 ](https://fusion-energy.github.io/openmc_cylindrical_mesh_plotter/examples/csg_cylinder_box/geometry.xml)
+        
     )
 
     statepoint_file = st.file_uploader("Select your statepoint h5 file", type=["h5"])
@@ -107,6 +103,8 @@ def main():
     else:
         save_uploadedfile(statepoint_file)
         statepoint = openmc.StatePoint(statepoint_file.name)
+
+        geometry =  statepoint.summary.geometry
 
         tally_description = get_cylindricalmesh_tallies_and_scores(statepoint)
         tally_description_str = [
@@ -123,15 +121,16 @@ def main():
         basis = st.sidebar.selectbox(
             label="view direction",
             options=("PhiR", "RZ"),
-            index=0,
+            index=1,
             key="axis",
             help="",
         )
 
-        value = st.sidebar.radio("Tally mean or std dev", options=["mean", "std_dev"])
+        value = st.sidebar.radio(
+            "Tally mean or std dev", options=["mean", "std_dev"])
 
         axis_units = st.sidebar.selectbox(
-            "Axis units", ["km", "m", "cm", "mm"], index=2
+            "Axis units", ["km", "m", "cm", "mm"], index=2, help='The units that appear on the X and Y axis'
         )
 
         volume_normalization = st.sidebar.radio(
@@ -145,8 +144,6 @@ def main():
         )
 
         tally = statepoint.get_tally(id=int(tally_id_to_plot))
-
-        mesh = tally.find_filter(filter_type=openmc.MeshFilter).mesh
 
         if basis == "RZ":
             max_value = int(tally.shape[1] / 2)  # index 1 is the phi value
@@ -175,21 +172,52 @@ def main():
         # else:
         #     contour_levels = None
 
-        colorbar = st.sidebar.radio("Include colorbar", options=[True, False])
-
-        title = st.sidebar.text_input(
-            "Colorbar title",
-            help="Optionally set your own colorbar label for the plot",
-            value="colorbar title",
-        )
-
-        log_lin_scale = st.sidebar.radio("Scale", options=["log", "linear"])
+        log_lin_scale = st.sidebar.radio(
+            "Scale", options=["log", "linear"], help='The color scale applied')
         if log_lin_scale == "linear":
             norm = None
         else:
             norm = LogNorm()
 
+        colorbar = st.sidebar.radio("Include colorbar", options=[True, False])
+
+        if colorbar:
+            title = st.sidebar.text_input(
+                "Colorbar title",
+                help="Optionally set your own colorbar label for the plot",
+                value="colorbar title",
+            )
+        else:
+            title=None
+        
         if basis == "RZ":
+            outline = st.sidebar.radio("Geometry outline", options=[True, False])
+            if outline:
+                geometry_basis = st.sidebar.selectbox(
+                    label="geometry outline basis",
+                    options=("xz", "yz"),
+                    index=0,
+                    key="outline_axis",
+                    help="The axis/basis to use for the geometry outline plot",
+                )
+                outline_by = st.sidebar.selectbox(
+                    label="geometry outline basis",
+                    options=("cell", "material"),
+                    index=0,
+                    key="outline_by",
+                    help="The type of geometry outline to plot",
+                )
+                outline_pixels = st.sidebar.number_input(
+                    "Scaling factor",
+                    value=40000,
+                    help="The resolution to use for the outline plot. Increaing the value produces a smoother outline but takes longer.",
+                )
+            else:
+                # outline not plotted but varibles still need values
+                geometry_basis ='xz'
+                outline_by='cell'
+                outline_pixels=40000
+
             plot = plot_mesh_tally_rz_slice(
                 tally=tally,
                 slice_index=slice_index,
@@ -197,11 +225,11 @@ def main():
                 axes=None,
                 axis_units=axis_units,
                 value=value,
-                # outline: bool = False,
-                # outline_by: str = "cell",
-                # geometry: Optional["openmc.Geometry"] = None,
-                # geometry_basis: str = "xz",
-                # pixels: int = 40000,
+                outline = outline,
+                outline_by=outline_by,
+                geometry=geometry,
+                geometry_basis=geometry_basis,
+                pixels = outline_pixels,
                 colorbar=colorbar,
                 volume_normalization=volume_normalization,
                 scaling_factor=scaling_factor,

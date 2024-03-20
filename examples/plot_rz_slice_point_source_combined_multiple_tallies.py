@@ -10,7 +10,6 @@
 import openmc
 import numpy as np
 from math import pi
-import matplotlib.pyplot as plt
 from openmc_cylindrical_mesh_plotter import plot_mesh_tally_rz_slice
 
 mesh = openmc.CylindricalMesh(

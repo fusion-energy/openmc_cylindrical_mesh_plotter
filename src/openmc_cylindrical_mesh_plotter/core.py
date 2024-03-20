@@ -8,7 +8,8 @@ import openmc
 import openmc.checkvalue as cv
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('agg')
+
+matplotlib.use("agg")
 
 from packaging import version
 

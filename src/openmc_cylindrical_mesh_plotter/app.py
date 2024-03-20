@@ -91,7 +91,6 @@ def main():
 
         """
         # Not got a h5 file handy, right mouse 🖱️ click and save these links
-        
     )
 
     statepoint_file = st.file_uploader("Select your statepoint h5 file", type=["h5"])
@@ -104,7 +103,7 @@ def main():
         save_uploadedfile(statepoint_file)
         statepoint = openmc.StatePoint(statepoint_file.name)
 
-        geometry =  statepoint.summary.geometry
+        geometry = statepoint.summary.geometry
 
         tally_description = get_cylindricalmesh_tallies_and_scores(statepoint)
         tally_description_str = [
@@ -126,11 +125,13 @@ def main():
             help="",
         )
 
-        value = st.sidebar.radio(
-            "Tally mean or std dev", options=["mean", "std_dev"])
+        value = st.sidebar.radio("Tally mean or std dev", options=["mean", "std_dev"])
 
         axis_units = st.sidebar.selectbox(
-            "Axis units", ["km", "m", "cm", "mm"], index=2, help='The units that appear on the X and Y axis'
+            "Axis units",
+            ["km", "m", "cm", "mm"],
+            index=2,
+            help="The units that appear on the X and Y axis",
         )
 
         volume_normalization = st.sidebar.radio(
@@ -173,7 +174,8 @@ def main():
         #     contour_levels = None
 
         log_lin_scale = st.sidebar.radio(
-            "Scale", options=["log", "linear"], help='The color scale applied')
+            "Scale", options=["log", "linear"], help="The color scale applied"
+        )
         if log_lin_scale == "linear":
             norm = None
         else:
@@ -188,8 +190,8 @@ def main():
                 value="colorbar title",
             )
         else:
-            title=None
-        
+            title = None
+
         if basis == "RZ":
             outline = st.sidebar.radio("Geometry outline", options=[True, False])
             if outline:
@@ -214,9 +216,9 @@ def main():
                 )
             else:
                 # outline not plotted but varibles still need values
-                geometry_basis ='xz'
-                outline_by='cell'
-                outline_pixels=40000
+                geometry_basis = "xz"
+                outline_by = "cell"
+                outline_pixels = 40000
 
             plot = plot_mesh_tally_rz_slice(
                 tally=tally,
@@ -225,11 +227,11 @@ def main():
                 axes=None,
                 axis_units=axis_units,
                 value=value,
-                outline = outline,
+                outline=outline,
                 outline_by=outline_by,
                 geometry=geometry,
                 geometry_basis=geometry_basis,
-                pixels = outline_pixels,
+                pixels=outline_pixels,
                 colorbar=colorbar,
                 volume_normalization=volume_normalization,
                 scaling_factor=scaling_factor,

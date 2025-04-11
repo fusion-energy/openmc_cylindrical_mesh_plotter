@@ -95,8 +95,6 @@ def _get_tally_data(
 ):
     tally_slice = tally.get_slice(scores=[score])
 
-    tally_slice = tally.get_slice(scores=[score])
-
     tally_data = tally_slice.get_reshaped_data(expand_dims=True, value=value).squeeze()
 
     if slice_index is None:
